@@ -1,0 +1,4 @@
+// 提示文件帮助 Visual Studio IDE 解释 Visual C++ 标识符,
+// 如函数和宏的名称。
+// 有关详细信息，请参见 https://go.microsoft.com/fwlink/?linkid=865984
+#define PCL_DEPRECATED(Major, Minor, Message) _PCL_COMPAT_MAJOR_VERSION( Major, _PCL_COMPAT_MINOR_VERSION( Minor, _PCL_DEPRECATED_IMPL(_PCL_PREPARE_REMOVAL_MESSAGE(Major, Minor, Message)), unneeded_deprecation), major_version_mismatch)
