@@ -71,6 +71,7 @@ public:
 	}
 };
 
-int main() {
-	PointCloudFilter::uniformSampling();
-}
+//void main3333() {
+//	PointCloudFilter::uniformSampling();
+//	
+//}
