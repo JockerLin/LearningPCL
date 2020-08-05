@@ -98,8 +98,8 @@ void generatroRangeImage() {
 	viewer.spin();
 }
 
-int main() {
-	VisualLization::demoCallBack1();
-	//generatroRangeImage();
-	return 0;
-}
+//int main() {
+//	VisualLization::demoCallBack1();
+//	//generatroRangeImage();
+//	return 0;
+//}
