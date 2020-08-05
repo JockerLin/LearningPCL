@@ -6,6 +6,8 @@
 #include <pcl/visualization/range_image_visualizer.h>   //深度图可视化的头文件
 #include <pcl/visualization/pcl_visualizer.h>      //PCL可视化的头文件
 #include <pcl/console/parse.h>
+#include "rangeimage.h"
+
 
 typedef pcl::PointXYZ PointType;
 //参数
@@ -40,8 +42,7 @@ setViewerPose(pcl::visualization::PCLVisualizer& viewer, const Eigen::Affine3f& 
 }
 
 //主函数
-int
-main23(int argc, char** argv)
+int lookRangeImage(int argc, char** argv)
 {
 	//输入命令分析
 	if (pcl::console::find_argument(argc, argv, "-h") >= 0)
