@@ -20,6 +20,42 @@ void generatroRangeImage();
 static class VisualLization {
 public:
 
+	static pcl::PointCloud<PointT>::Ptr getPointCloud(const string path) {
+		pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+		pcl::io::loadPCDFile(path, *cloud);
+		return cloud;
+	}
+
+	static void comPare2PointCloud(pcl::PointCloud<PointT>::Ptr pcd_src, pcl::PointCloud<PointT>::Ptr pcd_tgt) {
+		//pcl::visualization::PCLVisualizer viewer("registration Viewer");
+		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer);
+
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> src_h(pcd_src, 0, 255, 0);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> tgt_h(pcd_tgt, 255, 0, 0);
+		//pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> final_h(pcd_final, 0, 0, 255);
+		viewer->setBackgroundColor(255, 255, 255);
+		viewer->addPointCloud(pcd_src, src_h, "source cloud");
+		viewer->addPointCloud(pcd_tgt, tgt_h, "tgt cloud");
+		//viewer.addPointCloud(pcd_final, final_h, "final cloud");
+
+		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 7, "tgt cloud");
+		
+		// 设定参数
+		// 按键“a”显示与隐藏关键点云
+		bool isShow = true;
+		struct callback_args1 kb_args;
+		kb_args.isShow = &isShow;
+		kb_args.origin_points = pcd_src;
+		kb_args.viewerPtr = viewer;
+		viewer->registerKeyboardCallback(kb_callback, (void*)&kb_args);
+		
+		while (!viewer->wasStopped())
+		{
+			viewer->spinOnce(100);
+			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+		}
+	}
+
 	// 1-点云可视化基本操作
 	static void baseOperate() {
 
