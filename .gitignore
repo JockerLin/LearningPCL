@@ -1,8 +1,7 @@
 *.opendb
 .vs/
 x64/
-pcl_test.sln
-pcl_test/x64/
-pcl_test/pcl_test.vcxproj
-pcl_test/pcl_test.vcxproj.filters
-pcl_test/pcl_test.vcxproj.user
+learningPCL/x64/
+learningPCL/learningPCL.vcxproj
+learningPCL/learningPCL.vcxproj.filters
+learningPCL/learningPCL.vcxproj.user

@@ -3,6 +3,7 @@
 #include <pcl/point_types.h>
 #include <pcl/keypoints/iss_3d.h>
 #include <pcl/keypoints/harris_3d.h>
+#include <pcl/keypoints/sift_keypoint.h>
 #include <time.h>
 #include "visualization.h"
 
@@ -25,6 +26,7 @@ public:
 
 		pcl::ISSKeypoint3D<PointT, PointT> iss_detector;
 		iss_detector.setSearchMethod(tree);
+		//iss_detector.setBorderRadius()
 		iss_detector.setSalientRadius(6 * resolution);
 		iss_detector.setNonMaxRadius(4 * resolution);
 		iss_detector.setThreshold21(0.975);
@@ -69,7 +71,52 @@ public:
 
 		VisualLization::comPare2PointCloud(cloud, keys);
 	}
-	//static void demoVector();
+
+	static void siftDetector() {
+		pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+		//pcl::io::loadPCDFile("rabbit.pcd", *cloud);
+		cloud = VisualLization::getPointCloud("rabbit.pcd");
+
+		double resolution = 0.0005;
+
+		// 法向量
+		pcl::NormalEstimation<pcl::PointXYZ, pcl::PointNormal> ne;
+		pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normals(new pcl::PointCloud<pcl::PointNormal>);
+		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_n(new pcl::search::KdTree<pcl::PointXYZ>());
+		ne.setInputCloud(cloud);
+		ne.setSearchMethod(tree_n);
+		//	ne.setRadiusSearch(10 * resolution);
+		ne.setKSearch(50);
+		ne.compute(*cloud_normals);
+
+		// 拷贝数据
+		// 若不拷贝点，只有法向量的数据,会怎样？不行 是根据点云为基础 法向量作为关键点寻找特征
+		for (size_t i = 0; i < cloud_normals->points.size(); ++i)
+		{
+			cloud_normals->points[i].x = cloud->points[i].x;
+			cloud_normals->points[i].y = cloud->points[i].y;
+			cloud_normals->points[i].z = cloud->points[i].z;
+		}
+
+		// sift参数
+		const float min_scale = 0.001f;
+		const int n_octaves = 5; //3
+		const int n_scales_per_octave = 6; //4
+		const float min_contrast = 0.001f;
+
+		// 使用法向量作为强度计算关键点，还可以是rgb、z值或者自定义，具体参看API
+		pcl::SIFTKeypoint<pcl::PointNormal, PointT> sift; //PointT 可以是 pcl::PointWithScale包含尺度信息
+		//pcl::PointCloud<PointT> keys;
+		pcl::PointCloud<PointT>::Ptr keys(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::search::KdTree<pcl::PointNormal>::Ptr tree(new pcl::search::KdTree<pcl::PointNormal>());
+		sift.setSearchMethod(tree);
+		sift.setScales(min_scale, n_octaves, n_scales_per_octave);
+		sift.setMinimumContrast(min_contrast);
+		sift.setInputCloud(cloud_normals);
+		sift.compute(*keys);
+		std::cout << "No of SIFT points in the result are " << keys->points.size() << std::endl;
+		VisualLization::comPare2PointCloud(cloud, keys);
+		system("pause");
+
+	}
 };
-
-

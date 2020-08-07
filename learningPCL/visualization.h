@@ -10,6 +10,14 @@
 #include <pcl/search/kdtree.h>
 #include <pcl/range_image/range_image.h>
 #include <pcl/visualization/range_image_visualizer.h>   //深度图可视化的头文件
+#include <pcl/common/transforms.h>
+#include <pcl/registration/transformation_estimation_svd.h>
+#include <pcl/keypoints/harris_3d.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/features/shot.h>
+#include <pcl/registration/correspondence_estimation.h>
+#include <pcl/visualization/pcl_visualizer.h>
+
 
 using namespace std;
 typedef pcl::PointXYZ PointT;
@@ -45,7 +53,7 @@ public:
 		bool isShow = true;
 		struct callback_args1 kb_args;
 		kb_args.isShow = &isShow;
-		kb_args.origin_points = pcd_src;
+		kb_args.origin_points = pcd_tgt;
 		kb_args.viewerPtr = viewer;
 		viewer->registerKeyboardCallback(kb_callback, (void*)&kb_args);
 		
@@ -54,6 +62,37 @@ public:
 			viewer->spinOnce(100);
 			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 		}
+	}
+
+	static void rotatePointCloud(pcl::PointCloud<PointT>::Ptr cloud_src, pcl::PointCloud<PointT>::Ptr cloud_trans) {
+		//pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
+		//pcl::PointCloud<PointT>::Ptr cloud_trans(new pcl::PointCloud<PointT>);
+		//cloud_src = getPointCloud("rabbit.pcd");
+
+		Eigen::Matrix4f transformation(Eigen::Matrix4f::Identity());
+		transformation(0, 0) = -0.441;
+		transformation(0, 1) = 0.896;
+		transformation(0, 2) = -0.031;
+		transformation(0, 3) = 0.05;
+		transformation(1, 0) = -0.7586;
+		transformation(1, 1) = -0.392;
+		transformation(1, 2) = -0.520;
+		transformation(1, 3) = 0.1;
+		transformation(2, 0) = -0.478;
+		transformation(2, 1) = -0.206;
+		transformation(2, 2) = 0.853;
+		transformation(2, 3) = -0.038;
+		transformation(3, 0) = 0.0;
+		transformation(3, 1) = 0.0;
+		transformation(3, 2) = 0.0;
+		transformation(3, 3) = 1.0;
+
+		pcl::transformPointCloud(*cloud_src, *cloud_trans, transformation);
+		
+		//pcl::visualization::CloudViewer viewer("pcl");
+		//viewer.showCloud(cloud_trans);
+		//while (!viewer.wasStopped()) {};
+
 	}
 
 	// 1-点云可视化基本操作
@@ -116,20 +155,28 @@ public:
 		pcl::visualization::PCLVisualizer::Ptr viewerPtr;
 	};
 	static void kb_callback(const pcl::visualization::KeyboardEvent& event, void* args) {
-		if (event.keyDown() && event.getKeyCode() == 'a') {
+		if (event.keyDown()) {
 			cout << "a has pressed" << endl;
 			struct callback_args1* data = (struct callback_args1 *)args;
-			if (*(data->isShow)) {
-				data->viewerPtr->removePointCloud("cloud");
-				*(data->isShow) = false;
-				cout << "remove" << endl;
+			if (event.getKeyCode() == 'a') {
+				if (*(data->isShow)) {
+					data->viewerPtr->removePointCloud("cloud");
+					*(data->isShow) = false;
+					cout << "remove" << endl;
+				}
+				else {
+					data->viewerPtr->addPointCloud(data->origin_points, "cloud");
+					*(data->isShow) = true;
+					cout << "add" << endl;
+				}
 			}
-			else {
-				data->viewerPtr->addPointCloud(data->origin_points, "cloud");
-				*(data->isShow) = true;
-				cout << "add" << endl;
+			else if (event.getKeyCode() == 's') {
+				pcl::io::savePCDFile("key_points.pcd", *(data->origin_points));
+				cout << "save key points succeed!" << endl;
 			}
+			
 		}
+		
 	}
 	static void demoCallBack1() {
 		pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
