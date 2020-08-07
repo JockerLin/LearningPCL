@@ -33,7 +33,7 @@ C:\Program Files\OpenNI2\Tools
    PointCloudBaseOperate::generatePointCloudShow();
    ```
 
-   ![DIY PC](learningPCL\material\diy_pc.gif)
+   ![DIY PC](learningPCL/material/diy_pc.gif)
 
    
 
@@ -48,7 +48,7 @@ C:\Program Files\OpenNI2\Tools
 
    定义第0个点位目标点，在目标点附近搜寻30个点。
 
-   ![KNeastPS](learningPCL\material\KNeastPS.png)
+   ![KNeastPS](learningPCL/material/KNeastPS.png)
 
    
 
@@ -62,7 +62,7 @@ C:\Program Files\OpenNI2\Tools
 
    [pointcloudfilter.h](LearningPCL/pointcloudfilter.h)
 
-   ![surface_vector](learningPCL\material\surface_vector.gif)
+   ![surface_vector](learningPCL/material/surface_vector.gif)
 
    
 
@@ -82,7 +82,7 @@ C:\Program Files\OpenNI2\Tools
 
      同样是基于2D的拓展，参考的是这一篇Paper[Distinctive image features from scale-invariant keypoints](https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf)，使用的是图像固有特征的尺度不变性。(未读)
 
-   ![keypoints harris](learningPCL\material\keypoints_harris.gif)
+   ![keypoints harris](learningPCL/material/keypoints_harris.gif)
 
    
 
@@ -96,7 +96,7 @@ C:\Program Files\OpenNI2\Tools
 
    一些主流的点云描述子都有在文中介绍，但有一个PPF的方法没介绍。
 
-   ![3D descriptos](learningPCL\material\descriptors.png)
+   ![3D descriptos](learningPCL/material/descriptors.png)
 
    PCL提供了PFH、FPFH、SHOT的接口。
 
@@ -112,7 +112,7 @@ C:\Program Files\OpenNI2\Tools
 
    [rangeimage.h](learningPCL/rangeimage.h)
 
-   ![range image](learningPCL\material\rangeimage.gif)
+   ![range image](learningPCL/material/rangeimage.gif)
 
    
 
@@ -122,7 +122,7 @@ C:\Program Files\OpenNI2\Tools
 
    [matchdemo.h](learningPCL/matchdemo.h)
 
-   ![pc_match](learningPCL\material\pc_match.gif)
+   ![pc_match](learningPCL/material/pc_match.gif)
 
    
 
