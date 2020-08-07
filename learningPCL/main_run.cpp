@@ -13,6 +13,7 @@ void showRotatePointCloud() {
 	pcl::PointCloud<PointT>::Ptr cloud_tgt(new pcl::PointCloud<PointT>);
 	VisualLization::rotatePointCloud(cloud_src, cloud_tgt);
 	VisualLization::comPare2PointCloud(cloud_src, cloud_tgt);
+
 }
 
 void main(int argc, char** argv) {
