@@ -42,44 +42,45 @@ setViewerPose(pcl::visualization::PCLVisualizer& viewer, const Eigen::Affine3f& 
 }
 
 //主函数
-int lookRangeImage(int argc, char** argv)
+int lookRangeImage()
 {
-	//输入命令分析
-	if (pcl::console::find_argument(argc, argv, "-h") >= 0)
-	{
-		printUsage(argv[0]);
-		return 0;
-	}
-	if (pcl::console::find_argument(argc, argv, "-l") >= 0)
-	{
-		live_update = true;
-		std::cout << "Live update is on.\n";
-	}
-	if (pcl::console::parse(argc, argv, "-rx", angular_resolution_x) >= 0)
-		std::cout << "Setting angular resolution in x-direction to " << angular_resolution_x << "deg.\n";
-	if (pcl::console::parse(argc, argv, "-ry", angular_resolution_y) >= 0)
-		std::cout << "Setting angular resolution in y-direction to " << angular_resolution_y << "deg.\n";
-	int tmp_coordinate_frame;
-	if (pcl::console::parse(argc, argv, "-c", tmp_coordinate_frame) >= 0)
-	{
-		coordinate_frame = pcl::RangeImage::CoordinateFrame(tmp_coordinate_frame);
-		std::cout << "Using coordinate frame " << (int)coordinate_frame << ".\n";
-	}
-	angular_resolution_x = pcl::deg2rad(angular_resolution_x);
-	angular_resolution_y = pcl::deg2rad(angular_resolution_y);
+	////输入命令分析
+	//if (pcl::console::find_argument(argc, argv, "-h") >= 0)
+	//{
+	//	printUsage(argv[0]);
+	//	return 0;
+	//}
+	//if (pcl::console::find_argument(argc, argv, "-l") >= 0)
+	//{
+	//	live_update = true;
+	//	std::cout << "Live update is on.\n";
+	//}
+	//if (pcl::console::parse(argc, argv, "-rx", angular_resolution_x) >= 0)
+	//	std::cout << "Setting angular resolution in x-direction to " << angular_resolution_x << "deg.\n";
+	//if (pcl::console::parse(argc, argv, "-ry", angular_resolution_y) >= 0)
+	//	std::cout << "Setting angular resolution in y-direction to " << angular_resolution_y << "deg.\n";
+	//int tmp_coordinate_frame;
+	//if (pcl::console::parse(argc, argv, "-c", tmp_coordinate_frame) >= 0)
+	//{
+	//	coordinate_frame = pcl::RangeImage::CoordinateFrame(tmp_coordinate_frame);
+	//	std::cout << "Using coordinate frame " << (int)coordinate_frame << ".\n";
+	//}
+	
+	angular_resolution_x = pcl::deg2rad(5.0);
+	angular_resolution_y = pcl::deg2rad(5.0);
 
 	//读取点云PCD文件  如果没有输入PCD文件就生成一个点云
 	pcl::PointCloud<PointType>::Ptr point_cloud_ptr(new pcl::PointCloud<PointType>);
 	pcl::PointCloud<PointType>& point_cloud = *point_cloud_ptr;
 	Eigen::Affine3f scene_sensor_pose(Eigen::Affine3f::Identity());   //申明传感器的位置是一个4*4的仿射变换
-	std::vector<int> pcd_filename_indices = pcl::console::parse_file_extension_argument(argc, argv, "pcd");
+	std::vector<int> pcd_filename_indices;
 	if (!pcd_filename_indices.empty())
 	{
-		std::string filename = argv[pcd_filename_indices[0]];
+		std::string filename ;
 		if (pcl::io::loadPCDFile(filename, point_cloud) == -1)
 		{
 			std::cout << "Was not able to open file \"" << filename << "\".\n";
-			printUsage(argv[0]);
+			
 			return 0;
 		}
 		//给传感器的位姿赋值  就是获取点云的传感器的的平移与旋转的向量

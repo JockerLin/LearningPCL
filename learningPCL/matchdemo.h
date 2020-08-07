@@ -133,9 +133,6 @@ int match2PointCloud()
 		}
 	}
 
-		
-	
-
 	pcl::visualization::PointCloudColorHandlerCustom<PointT> green_trans(cloud_trans, 0, 255, 0);
 	viewer.addPointCloud(cloud_trans, green_trans, "cloud_trans");
 

@@ -5,6 +5,8 @@
 #include "keypoints.h"
 #include "featuredescribes.h"
 #include "matchdemo.h"
+#include "searchpoints.h"
+
 
 void showRotatePointCloud() {
 	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
@@ -17,11 +19,13 @@ void showRotatePointCloud() {
 }
 
 void main(int argc, char** argv) {
-	//VisualLization::demoCallBack1();
-	//lookRangeImage(argc, argv);
-
+	//自定义点云
+	//PointCloudBaseOperate::generatePointCloudShow();
+	
 	//VisualLization::rotatePointCloud();
 
+	// 最近邻搜索
+	//PointCloudBaseOperate::kdTreeFlann();
 
 	// 点云降采样
 	// PointCloudFilter::uniformSampling();
@@ -41,8 +45,9 @@ void main(int argc, char** argv) {
 	// 特征描述
 	//FeatureDescribes::PFHOrSHOT();
 	
-	// example两个点云集合的关键点匹配算出transformation
-	match2PointCloud();
+	// 两个点云集合的关键点匹配算出transformation
+	//match2PointCloud();
 
 	//showRotatePointCloud();
+	lookRangeImage();
 }
