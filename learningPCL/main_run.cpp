@@ -49,5 +49,6 @@ void main(int argc, char** argv) {
 	//match2PointCloud();
 
 	//showRotatePointCloud();
-	lookRangeImage();
+	FeatureDescribes::ROPS();
+	// lookRangeImage();
 }

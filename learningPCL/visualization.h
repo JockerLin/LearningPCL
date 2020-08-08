@@ -16,7 +16,6 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/shot.h>
 #include <pcl/registration/correspondence_estimation.h>
-#include <pcl/visualization/pcl_visualizer.h>
 
 
 using namespace std;

@@ -8,11 +8,17 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/pfh.h>
 #include <pcl/features/shot.h>
+#include <pcl/features/rops_estimation.h>
+#include <pcl/surface/gp3.h>
+
 
 typedef pcl::PointXYZ PointT;
 typedef pcl::Normal PointNormal;
 typedef pcl::PFHSignature125 FeaturePFH;
 typedef pcl::SHOT352 FeatureSHOT;
+
+// 点云文件使用 "rabbit.pcd"
+// 关键点文件 "rabbit_sift_kps.pcd"
 
 static class FeatureDescribes {
 public:
@@ -68,4 +74,70 @@ public:
 
 		system("pause");
 	}
+
+	static void ROPS() {
+		// 加载点云
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::io::loadPCDFile("rabbit.pcd", *cloud);
+
+		// 加载关键点
+		pcl::PointCloud<pcl::PointXYZ>::Ptr key_points(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::io::loadPCDFile("rabbit_sift_kps.pcd", *key_points);
+
+		// 计算法向量
+		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+		pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+		tree->setInputCloud(cloud);
+		n.setInputCloud(cloud);
+		n.setSearchMethod(tree);
+		n.setKSearch(20);
+		n.compute(*normals);
+
+		// 连接数据
+		pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
+		pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
+		//* cloud_with_normals = cloud + normals
+
+		// ---- rops基于网格，所以要先将pcd点云数据重建网格 ---
+
+		// Create search tree*
+		pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(new pcl::search::KdTree<pcl::PointNormal>);
+		tree2->setInputCloud(cloud_with_normals);
+
+		pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;// Initialize objects
+		pcl::PolygonMesh triangles;
+		// Set the maximum distance between connected points (maximum edge length)
+		gp3.setSearchRadius(0.025);
+		gp3.setMu(2.5); // Set typical values for the parameters
+		gp3.setMaximumNearestNeighbors(100);
+		gp3.setMaximumSurfaceAngle(M_PI / 4); // 45 degrees
+		gp3.setMinimumAngle(M_PI / 18); // 10 degrees
+		gp3.setMaximumAngle(2 * M_PI / 3); // 120 degrees
+		gp3.setNormalConsistency(false);
+		gp3.setInputCloud(cloud_with_normals);
+		gp3.setSearchMethod(tree2);
+		gp3.reconstruct(triangles);	// Get result
+
+		// ----- rops 描述-------
+		// 由于pcl_1.8.0中rops还没有定义好的结构，所以采用pcl::Histogram存储描述子
+		pcl::ROPSEstimation<pcl::PointXYZ, pcl::Histogram<135>> rops;
+		rops.setInputCloud(key_points);
+		rops.setSearchSurface(cloud);
+		rops.setNumberOfPartitionBins(5);
+		rops.setNumberOfRotations(3);
+		rops.setRadiusSearch(0.01);
+		rops.setSupportRadius(0.01);
+		rops.setTriangles(triangles.polygons);
+		rops.setSearchMethod(pcl::search::KdTree<pcl::PointXYZ>::Ptr(new pcl::search::KdTree < pcl::PointXYZ>));
+		//feature size = number_of_rotations * number_of_axis_to_rotate_around * number_of_projections * number_of_central_moments
+		//unsigned int feature_size = number_of_rotations_ * 3 * 3 * 5; //计算出135
+		pcl::PointCloud<pcl::Histogram<135>> description;
+		rops.compute(description);  // 结果计算的是描述子。。需传入inputcloud和surface
+		std::cout << "size is " << description.points.size() << std::endl;
+		//pcl::io::savePCDFile("rops_des.pcd", description); // 此句出错！！pcl::Histogram没有对应的保存方法
+
+		system("pause");
+	}
+
 };
