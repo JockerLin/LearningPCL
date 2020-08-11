@@ -46,9 +46,10 @@ void main(int argc, char** argv) {
 	//FeatureDescribes::PFHOrSHOT();
 	
 	// 两个点云集合的关键点匹配算出transformation
-	//match2PointCloud();
+	match2PointCloud();
 
 	//showRotatePointCloud();
-	FeatureDescribes::ROPS();
+	//FeatureDescribes::ROPS();
 	// lookRangeImage();
+	// VisualLization::readCSVFile();
 }

@@ -48,12 +48,15 @@ public:
 	static void HarrisDetector() {
 		pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
 		//pcl::io::loadPCDFile("rabbit.pcd", *cloud);
-		cloud = VisualLization::getPointCloud("rabbit.pcd");
+		cloud = VisualLization::getPointCloud("phone2_add20.pcd");
 		std::cout << "original cloud size : " << cloud->size() << std::endl;
 		clock_t start = clock();
 		// 对于兔子模型 0.0005的分辨率35947个点生成221个关键点
-		// 分辨率越小 关键点越少
-		double resolution = 0.0005;
+		// 分辨率越小 关键点越少 不全是
+
+		// 对于手机边缘的模型 0.05 有200个关键点 
+		// 分辨率与点云之间的距离是有关系的
+		double resolution = 0.05;
 
 		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>());
 

@@ -10,6 +10,8 @@
 #include "visualization.h"
 #include "featuredescribes.h"
 #include "keypoints.h"
+#include "visualization.h"
+
 /*
 #include <pcl/common/transforms.h>
 #include <pcl/registration/transformation_estimation_svd.h>
@@ -59,14 +61,37 @@ void getFeatures(const pcl::PointCloud<PointT>::Ptr &cloud, const pcl::PointClou
 int match2PointCloud()
 {
 	// 读取点云
-	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("rabbit.pcd", *cloud_src);
+	pcl::PointCloud<PointT>::Ptr cloud_input_src(new pcl::PointCloud<PointT>);
+	pcl::io::loadPCDFile("phone0_add0.pcd", *cloud_input_src);
 
-	pcl::PointCloud<PointT>::Ptr cloud_tgt(new pcl::PointCloud<PointT>);
-	VisualLization::rotatePointCloud(cloud_src, cloud_tgt);
+	pcl::PointCloud<PointT>::Ptr cloud_input_tgt(new pcl::PointCloud<PointT>);
+	pcl::io::loadPCDFile("phone2_add20.pcd", *cloud_input_tgt);
+	//VisualLization::rotatePointCloud(cloud_src, cloud_tgt);
+
+	// 选择ROI
+	pcl::visualization::PCLVisualizer viewer_select_ROI;
+	viewer_select_ROI.addPointCloud(cloud_input_src);
+	struct VisualLization::callback_args3 cb_args;
+	cb_args.orgin_points = cloud_input_src;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src(new pcl::PointCloud<pcl::PointXYZ>);
+	cb_args.chosed_points_3d = cloud_src;
+	cb_args.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(&viewer_select_ROI);
+	viewer_select_ROI.registerAreaPickingCallback(VisualLization::ap_callback, (void*)&cb_args);
+	viewer_select_ROI.spin();
+
+	// 选择ROI
+	pcl::visualization::PCLVisualizer viewer_select_ROI2;
+	viewer_select_ROI2.addPointCloud(cloud_input_tgt);
+	struct VisualLization::callback_args3 cb_args2;
+	cb_args2.orgin_points = cloud_input_tgt;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt(new pcl::PointCloud<pcl::PointXYZ>);
+	cb_args2.chosed_points_3d = cloud_tgt;
+	cb_args2.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(&viewer_select_ROI2);
+	viewer_select_ROI2.registerAreaPickingCallback(VisualLization::ap_callback, (void*)&cb_args2);
+	viewer_select_ROI2.spin();
 
 	// 计算模型分辨率
-	double resolution = 0.0005;
+	double resolution = 0.05;
 
 	// 提取关键点
 	pcl::PointCloud<PointT>::Ptr keys_src(new pcl::PointCloud<pcl::PointXYZ>);
@@ -90,12 +115,6 @@ int match2PointCloud()
 	cor_est.determineReciprocalCorrespondences(*cor);
 	std::cout << "compute Correspondences " << cor->size() << std::endl;
 
-	// 计算旋转平移矩阵
-	Eigen::Matrix4f transformation(Eigen::Matrix4f::Identity());
-	//getTransformation(keys_src, keys_tgt, resolution, *cor, transformation);
-	pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ> svd;
-	svd.estimateRigidTransformation(*cloud_src, *cloud_tgt, transformation);
-
 	/*
 	// 也可以不用关键点对应关系直接获取旋转平移矩阵
 	Eigen::Matrix4f transformation(Eigen::Matrix4f::Identity());
@@ -115,16 +134,29 @@ int match2PointCloud()
 	viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "keys_src");
 	viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "keys_tgt");
 
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src_for_trans(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt_for_trans(new pcl::PointCloud<pcl::PointXYZ>);
 	for (size_t i = 0; i < cor->size(); ++i) // 显示关键点匹配关系
 	{
 		PointT temp1 = keys_src->points[cor->at(i).index_query];
 		PointT temp2 = keys_tgt->points[cor->at(i).index_match];
+		cloud_src_for_trans->points.push_back(temp1);
+		cloud_tgt_for_trans->points.push_back(temp2);
 		std::stringstream ss;
 		ss << "line_" << i;
 		viewer.addLine(temp1, temp2, ss.str());
 	}
 
-	pcl::PointCloud<PointT>::Ptr cloud_trans(new pcl::PointCloud<pcl::PointXYZ>);
+	// 计算旋转平移矩阵
+	Eigen::Matrix4f transformation(Eigen::Matrix4f::Identity());
+	//getTransformation(keys_src, keys_tgt, resolution, *cor, transformation);
+	
+	// 计算transform之前将两边点集数量整理为一致
+	pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ> svd;
+	svd.estimateRigidTransformation(*cloud_src_for_trans, *cloud_tgt_for_trans, transformation);
+	cout << "begin transformation" << endl;
+	
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_trans(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::transformPointCloud(*cloud_src, *cloud_trans, transformation); // 将原点云旋转
 	for (int i = 0; i < 4; i++) {
 		cout << endl;
@@ -133,7 +165,7 @@ int match2PointCloud()
 		}
 	}
 
-	pcl::visualization::PointCloudColorHandlerCustom<PointT> green_trans(cloud_trans, 0, 255, 0);
+	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green_trans(cloud_trans, 0, 255, 0);
 	viewer.addPointCloud(cloud_trans, green_trans, "cloud_trans");
 
 	viewer.spin();

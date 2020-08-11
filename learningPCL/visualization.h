@@ -16,7 +16,8 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/shot.h>
 #include <pcl/registration/correspondence_estimation.h>
-
+#include <fstream>  
+#include <sstream>
 
 using namespace std;
 typedef pcl::PointXYZ PointT;
@@ -52,7 +53,7 @@ public:
 		bool isShow = true;
 		struct callback_args1 kb_args;
 		kb_args.isShow = &isShow;
-		kb_args.origin_points = pcd_tgt;
+		kb_args.origin_points = pcd_src;
 		kb_args.viewerPtr = viewer;
 		viewer->registerKeyboardCallback(kb_callback, (void*)&kb_args);
 		
@@ -61,6 +62,24 @@ public:
 			viewer->spinOnce(100);
 			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 		}
+	}
+
+	static void readCSVFile() {
+		ifstream fp("G:/blazarlin/3dfiles/0_height.csv");
+		vector<vector<double>> user_arr;
+		string line;
+		while (getline(fp, line)) {
+			vector<double> data_line;
+			string number;
+			istringstream readstr(line);
+			for (int j = 0; j < 3200; j++) {
+				getline(readstr, number, ',');
+				data_line.push_back(atof(number.c_str()));
+			}
+			user_arr.push_back(data_line);
+		}
+		cout << "read finished" << endl;
+		
 	}
 
 	static void rotatePointCloud(pcl::PointCloud<PointT>::Ptr cloud_src, pcl::PointCloud<PointT>::Ptr cloud_trans) {
