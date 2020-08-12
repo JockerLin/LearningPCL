@@ -84,10 +84,10 @@ int match2PointCloud()
 {
 	// 读取点云
 	pcl::PointCloud<PointT>::Ptr cloud_input_src(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("phone0_add0.pcd", *cloud_input_src);
+	pcl::io::loadPCDFile("phone2_add20.pcd", *cloud_input_src);
 
 	pcl::PointCloud<PointT>::Ptr cloud_input_tgt(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("phone2_add20.pcd", *cloud_input_tgt);
+	pcl::io::loadPCDFile("phone1_add20.pcd", *cloud_input_tgt);
 	//VisualLization::rotatePointCloud(cloud_src, cloud_tgt);
 
 	// 选择ROI
@@ -117,10 +117,10 @@ int match2PointCloud()
 
 	// 提取关键点
 	pcl::PointCloud<PointT>::Ptr keys_src(new pcl::PointCloud<pcl::PointXYZ>);
-	getISSKeyPoints(cloud_src, resolution, keys_src);
+	getHarrisKeyPoints(cloud_src, resolution, keys_src);
 
 	pcl::PointCloud<PointT>::Ptr keys_tgt(new pcl::PointCloud<pcl::PointXYZ>);
-	getISSKeyPoints(cloud_tgt, resolution, keys_tgt);
+	getHarrisKeyPoints(cloud_tgt, resolution, keys_tgt);
 
 	// 特征描述
 	pcl::PointCloud<FeatureT>::Ptr features_src(new pcl::PointCloud<FeatureT>);
@@ -215,5 +215,8 @@ int match2PointCloud()
 	viewer_finilly.addPointCloud(cloud_trans_from_tgt, show_handler_tgt, "tgt_handler");
 	viewer_finilly.spin();
 	system("pause");
+
+	pcl::io::savePCDFile("transform_tgt.pcd", *cloud_trans_from_tgt);
+
 	return 0;
 }

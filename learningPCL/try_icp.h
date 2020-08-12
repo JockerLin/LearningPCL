@@ -57,7 +57,7 @@ static class ICPMatch {
 public:
 	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp, Eigen::Matrix4f & transformation_matrix) {
 		PointCloudT::Ptr cloud_tr(new PointCloudT);  // Transformed point cloud
-		int iterations = 20;  // Default number of ICP iterations
+		int iterations = 50;  // Default number of ICP iterations
 
 		pcl::console::TicToc time;
 		time.tic();
