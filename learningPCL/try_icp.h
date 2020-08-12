@@ -35,7 +35,7 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 bool next_iteration = false;
 
 void
-print4x4Matrix(const Eigen::Matrix4d & matrix)
+print4x4Matrix(const Eigen::Matrix4f & matrix)
 {
 	printf("Rotation matrix :\n");
 	printf("    | %6.3f %6.3f %6.3f | \n", matrix(0, 0), matrix(0, 1), matrix(0, 2));
@@ -63,7 +63,7 @@ public:
 		time.tic();
 		// 备份 以便后续查看匹配的效果
 		*cloud_tr = *cloud_icp;  // We backup cloud_icp into cloud_tr for later use
-		Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
+		Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
 		// The Iterative Closest Point algorithm
 		// cloud in 数据不变 计算的是cloud_icp * T = cloud_in
 		time.tic();
@@ -80,7 +80,7 @@ public:
 		{
 			std::cout << "\nICP has converged, score is " << icp.getFitnessScore() << std::endl;
 			std::cout << "\nICP transformation " << iterations << " : cloud_icp -> cloud_in" << std::endl;
-			transformation_matrix = icp.getFinalTransformation().cast<double>();
+			transformation_matrix = icp.getFinalTransformation().cast<float>();
 			print4x4Matrix(transformation_matrix);
 		}
 		else
@@ -152,7 +152,7 @@ public:
 					printf("\033[11A");  // Go up 11 lines in terminal output.
 					printf("\nICP has converged, score is %+.0e\n", icp.getFitnessScore());
 					std::cout << "\nICP transformation " << ++iterations << " : cloud_icp -> cloud_in" << std::endl;
-					transformation_matrix *= icp.getFinalTransformation().cast<double>();  // WARNING /!\ This is not accurate! For "educational" purpose only!
+					transformation_matrix *= icp.getFinalTransformation().cast<float>();  // WARNING /!\ This is not accurate! For "educational" purpose only!
 					print4x4Matrix(transformation_matrix);  // Print the transformation between original pose and current pose
 
 					ss.str("");
@@ -168,6 +168,7 @@ public:
 			}
 			next_iteration = false;
 		}
+
 	}
 };
 
@@ -192,7 +193,7 @@ icpMatch()
 	std::cout << "\nLoaded file " << "fish-2.ply" << " (" << cloud_in->size() << " points) in " << time.toc() << " ms\n" << std::endl;
 
 	// Defining a rotation matrix and translation vector
-	Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
+	Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
 
 	// A rotation matrix (see https://en.wikipedia.org/wiki/Rotation_matrix)
 	double theta = M_PI / 8;  // The angle of rotation in radians
