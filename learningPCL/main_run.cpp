@@ -6,6 +6,7 @@
 #include "featuredescribes.h"
 #include "matchdemo.h"
 #include "searchpoints.h"
+#include "try_icp.h"
 
 
 void showRotatePointCloud() {
@@ -48,8 +49,11 @@ void main(int argc, char** argv) {
 	// 两个点云集合的关键点匹配算出transformation
 	match2PointCloud();
 
-	//showRotatePointCloud();
+	// showRotatePointCloud();
 	//FeatureDescribes::ROPS();
 	// lookRangeImage();
 	// VisualLization::readCSVFile();
+
+	// 测试icp
+	// icpMatch();
 }
