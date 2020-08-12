@@ -188,7 +188,7 @@ int match2PointCloud()
 	}
 
 	// 加入icp,继续优化transformation
-	ICPMatch::run(cloud_trans, cloud_tgt, transformation);
+	ICPMatch::run(cloud_trans, cloud_tgt);
 
 	// 0.302273 0.950977 0.0653723 75.2311
 	// -0.952828 0.299467 0.0493814 35.3466

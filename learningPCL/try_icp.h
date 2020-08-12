@@ -55,15 +55,15 @@ keyboardEventOccurred(const pcl::visualization::KeyboardEvent& event,
 
 static class ICPMatch {
 public:
-	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp, Eigen::Matrix4f &transformation_matrix) {
+	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp) {
 		PointCloudT::Ptr cloud_tr(new PointCloudT);  // Transformed point cloud
-		int iterations = 40;  // Default number of ICP iterations
+		int iterations = 10;  // Default number of ICP iterations
 
 		pcl::console::TicToc time;
 		time.tic();
 		// 备份 以便后续查看匹配的效果
 		*cloud_tr = *cloud_icp;  // We backup cloud_icp into cloud_tr for later use
-		//Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
+		Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
 		// The Iterative Closest Point algorithm
 		time.tic();
 		pcl::IterativeClosestPoint<PointT, PointT> icp;
@@ -191,7 +191,7 @@ icpMatch()
 	std::cout << "\nLoaded file " << "fish-2.ply" << " (" << cloud_in->size() << " points) in " << time.toc() << " ms\n" << std::endl;
 
 	// Defining a rotation matrix and translation vector
-	Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
 
 	// A rotation matrix (see https://en.wikipedia.org/wiki/Rotation_matrix)
 	double theta = M_PI / 8;  // The angle of rotation in radians
@@ -211,7 +211,7 @@ icpMatch()
 	// 输入点云cloud_in  目标匹配的点云cloud_icp 
 	pcl::transformPointCloud(*cloud_in, *cloud_icp, transformation_matrix);
 	// VisualLization::rotatePointCloud(cloud_in, cloud_icp);
-	ICPMatch::run(cloud_in, cloud_icp, transformation_matrix);
+	ICPMatch::run(cloud_in, cloud_icp);
 	return (0);
 }
 
