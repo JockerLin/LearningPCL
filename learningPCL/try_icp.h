@@ -55,7 +55,7 @@ keyboardEventOccurred(const pcl::visualization::KeyboardEvent& event,
 
 static class ICPMatch {
 public:
-	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp) {
+	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp, Eigen::Matrix4f & transformation_matrix) {
 		PointCloudT::Ptr cloud_tr(new PointCloudT);  // Transformed point cloud
 		int iterations = 20;  // Default number of ICP iterations
 
@@ -63,7 +63,7 @@ public:
 		time.tic();
 		// 备份 以便后续查看匹配的效果
 		*cloud_tr = *cloud_icp;  // We backup cloud_icp into cloud_tr for later use
-		Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
+		//Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
 		// The Iterative Closest Point algorithm
 		// cloud in 数据不变 计算的是cloud_icp * T = cloud_in
 		time.tic();
@@ -213,7 +213,7 @@ icpMatch()
 	// 输入点云cloud_in  目标匹配的点云cloud_icp 
 	pcl::transformPointCloud(*cloud_in, *cloud_icp, transformation_matrix);
 	// VisualLization::rotatePointCloud(cloud_in, cloud_icp);
-	ICPMatch::run(cloud_in, cloud_icp);
+	ICPMatch::run(cloud_in, cloud_icp, transformation_matrix);
 	return (0);
 }
 

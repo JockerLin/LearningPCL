@@ -194,19 +194,21 @@ int match2PointCloud()
 	viewer.spin();
 
 	// 加入icp,继续优化transformation
-	ICPMatch::run(cloud_src, cloud_trans);
+	Eigen::Matrix4f transformation_icp(Eigen::Matrix4f::Identity());
+	ICPMatch::run(cloud_src, cloud_trans, transformation_icp);
 
 	// 0.302273 0.950977 0.0653723 75.2311
 	// -0.952828 0.299467 0.0493814 35.3466
 	//	0.0273838 - 0.0772152 0.996638 0.40969
 	//	0 0 0 1
 
-	
+	Eigen::Matrix4f transformation_all(Eigen::Matrix4f::Zero());
+	transformation_all = transformation_icp * transformation;
 
 	pcl::visualization::PCLVisualizer viewer_finilly;
 	// 对原始输入做T变换
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_trans_from_tgt(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::transformPointCloud(*cloud_input_tgt, *cloud_trans_from_tgt, transformation); // 将原点云旋转
+	pcl::transformPointCloud(*cloud_input_tgt, *cloud_trans_from_tgt, transformation_all); // 将原点云旋转
 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> show_handler_tgt(cloud_trans_from_tgt, 0, 255, 0);
 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> show_handler(cloud_input_src, 255, 0, 0);
 	viewer_finilly.addPointCloud(cloud_input_src, show_handler, "handler_trans");
