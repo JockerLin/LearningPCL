@@ -57,7 +57,7 @@ static class ICPMatch {
 public:
 	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp) {
 		PointCloudT::Ptr cloud_tr(new PointCloudT);  // Transformed point cloud
-		int iterations = 10;  // Default number of ICP iterations
+		int iterations = 20;  // Default number of ICP iterations
 
 		pcl::console::TicToc time;
 		time.tic();
@@ -65,6 +65,7 @@ public:
 		*cloud_tr = *cloud_icp;  // We backup cloud_icp into cloud_tr for later use
 		Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
 		// The Iterative Closest Point algorithm
+		// cloud in 数据不变 计算的是cloud_icp * T = cloud_in
 		time.tic();
 		pcl::IterativeClosestPoint<PointT, PointT> icp;
 		icp.setMaximumIterations(iterations);
