@@ -187,6 +187,10 @@ int match2PointCloud()
 		}
 	}
 
+	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green_trans(cloud_trans, 0, 255, 0);
+	viewer.addPointCloud(cloud_trans, green_trans, "cloud_trans");
+	viewer.spin();
+
 	// 加入icp,继续优化transformation
 	ICPMatch::run(cloud_trans, cloud_tgt);
 
@@ -195,10 +199,7 @@ int match2PointCloud()
 	//	0.0273838 - 0.0772152 0.996638 0.40969
 	//	0 0 0 1
 
-	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green_trans(cloud_trans, 0, 255, 0);
-	viewer.addPointCloud(cloud_trans, green_trans, "cloud_trans");
-
-	viewer.spin();
+	
 
 	pcl::visualization::PCLVisualizer viewer_finilly;
 	// 对原始输入做T变换
