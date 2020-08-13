@@ -67,7 +67,7 @@ public:
 		viewer.addPointCloud(output);
 		viewer.spin();*/
 
-		system("pause");
+		//system("pause");
 
 	}
 };
