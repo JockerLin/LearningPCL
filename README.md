@@ -130,6 +130,15 @@ C:\Program Files\OpenNI2\Tools
 
 
 
+## Project
+
+### 1、边缘拼接
+
+![match](learningPCL/material/try_match_success_20200813.gif)
+
+
+
+
 ## Reference
 
 http://www.pclcn.org/study/shownews.php?lang=cn&id=205

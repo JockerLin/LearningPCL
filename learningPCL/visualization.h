@@ -343,4 +343,57 @@ public:
 
 		system("pause");
 	}
+
+	static void watchPhone4Part() {
+		pcl::PointCloud<PointT>::Ptr cloud_0(new pcl::PointCloud<PointT>);
+		pcl::io::loadPCDFile("phone_good_part/phone0_add0.pcd", *cloud_0);
+		pcl::PointCloud<PointT>::Ptr cloud_1(new pcl::PointCloud<PointT>);
+		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone1_from2plane.pcd", *cloud_1);
+		pcl::PointCloud<PointT>::Ptr cloud_2(new pcl::PointCloud<PointT>);
+		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone2.pcd", *cloud_2);
+		pcl::PointCloud<PointT>::Ptr cloud_3(new pcl::PointCloud<PointT>);
+		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone3.pcd", *cloud_3);
+
+		pcl::visualization::PCLVisualizer viewer("registration Viewer");
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> handler_0(cloud_0, 0, 255, 0);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> handler_1(cloud_1, 0, 255, 0);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> handler_2(cloud_2, 255, 0, 0);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> handler_3(cloud_3, 255, 0, 0);
+		viewer.addPointCloud(cloud_0, handler_0, "handler_0");
+		viewer.addPointCloud(cloud_1, handler_1, "handler_1");
+		viewer.addPointCloud(cloud_2, handler_2, "handler_2");
+		viewer.addPointCloud(cloud_3, handler_3, "handler_3");
+
+		//viewer.addCoordinateSystem(1.0);
+		while (!viewer.wasStopped())
+		{
+			viewer.spinOnce(100);
+			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+		}
+	}
+
+	// 三个点云比较
+	static void visualize3Pcd(
+		pcl::PointCloud<pcl::PointXYZ>::Ptr pcd_src,
+		pcl::PointCloud<pcl::PointXYZ>::Ptr pcd_tgt,
+		pcl::PointCloud<pcl::PointXYZ>::Ptr pcd_final)
+	{
+		//int vp_1, vp_2;
+		// Create a PCLVisualizer object
+		pcl::visualization::PCLVisualizer viewer("registration Viewer");
+		//viewer.createViewPort (0.0, 0, 0.5, 1.0, vp_1);
+	   // viewer.createViewPort (0.5, 0, 1.0, 1.0, vp_2);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> src_h(pcd_src, 0, 255, 0);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> tgt_h(pcd_tgt, 255, 0, 0);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> final_h(pcd_final, 0, 0, 255);
+		viewer.addPointCloud(pcd_src, src_h, "source cloud");
+		viewer.addPointCloud(pcd_tgt, tgt_h, "tgt cloud");
+		viewer.addPointCloud(pcd_final, final_h, "final cloud");
+		//viewer.addCoordinateSystem(1.0);
+		while (!viewer.wasStopped())
+		{
+			viewer.spinOnce(100);
+			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+		}
+	}
 };
