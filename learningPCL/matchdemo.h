@@ -5,9 +5,13 @@
 #include <pcl/keypoints/iss_3d.h>
 #include <pcl/keypoints/harris_3d.h>
 #include <pcl/features/normal_3d.h>
+#include <pcl/features/fpfh.h>
 #include <pcl/features/shot.h>
 #include <pcl/features/pfh.h>
 #include <pcl/keypoints/sift_keypoint.h>
+#include <pcl/registration/ia_ransac.h>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
 #include <pcl/registration/correspondence_estimation.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include "visualization.h"
@@ -15,6 +19,7 @@
 #include "keypoints.h"
 #include "visualization.h"
 #include "try_icp.h"
+#include "sacia.h"
 
 /*
 #include <pcl/common/transforms.h>
@@ -25,7 +30,9 @@
 
 typedef pcl::PointXYZ PointT;
 // typedef pcl::PFHSignature125 FeatureT;
-typedef pcl::SHOT352 FeatureT;
+// typedef pcl::SHOT352 FeatureT;
+typedef pcl::FPFHSignature33 FeatureT;
+
 
 // 获取Harris关键点
 void getHarrisKeyPoints(const pcl::PointCloud<PointT>::Ptr &cloud, double resolution,
@@ -73,13 +80,41 @@ void getFeatures(const pcl::PointCloud<PointT>::Ptr &cloud, const pcl::PointClou
 	nest.compute(*cloud_normal);
 	std::cout << "compute normal\n";
 
-	pcl::SHOTEstimation<PointT, pcl::Normal, FeatureT> shot;
+	pcl::FPFHEstimation<PointT, pcl::Normal, FeatureT> shot;
 	shot.setRadiusSearch(18 * resolution);
 	shot.setInputCloud(keys);
-	shot.setSearchSurface(cloud);
+	// shot.setSearchSurface(cloud);
+	pcl::search::KdTree<PointT>::Ptr tree_tgt_fpfh(new pcl::search::KdTree<PointT>);
+	shot.setSearchMethod(tree_tgt_fpfh);
 	shot.setInputNormals(cloud_normal);
 	shot.compute(*features);
 	std::cout << "compute feature\n";
+}
+
+
+
+void calPFPH(pcl::PointCloud<PointT>::Ptr &srcCloud, pcl::PointCloud<pcl::FPFHSignature33>::Ptr &fpfhs_src, double radius) {
+
+	// cal normal
+	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne_src;
+	ne_src.setInputCloud(srcCloud);
+	pcl::search::KdTree< pcl::PointXYZ>::Ptr tree_src(new pcl::search::KdTree< pcl::PointXYZ>());
+	ne_src.setSearchMethod(tree_src);
+	pcl::PointCloud<pcl::Normal>::Ptr cloud_src_normals(new pcl::PointCloud< pcl::Normal>);
+	//ne_src.setRadiusSearch(0.02);
+	ne_src.setKSearch(20);
+	ne_src.compute(*cloud_src_normals);
+
+	//计算FPFH
+	pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fpfh_src;
+	fpfh_src.setInputCloud(srcCloud);
+	fpfh_src.setInputNormals(cloud_src_normals);
+	pcl::search::KdTree<PointT>::Ptr tree_src_fpfh(new pcl::search::KdTree<PointT>);
+	fpfh_src.setSearchMethod(tree_src_fpfh);
+	//pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs_src(new pcl::PointCloud<pcl::FPFHSignature33>());
+	fpfh_src.setRadiusSearch(radius);
+	fpfh_src.compute(*fpfhs_src);
+	std::cout << "compute *cloud_src fpfh, feature size:" << fpfhs_src->size() << endl;
 }
 
 void getCorsbPoint() {
@@ -92,77 +127,38 @@ void getCorsbPoint() {
 
 	// 计算模型分辨率
 	double resolution = 0.05;
+	double radius = resolution * 18;
+	double leaf_size = 0.2;
 
-	// 提取关键点
-	pcl::PointCloud<PointT>::Ptr keys_src(new pcl::PointCloud<pcl::PointXYZ>);
-	getISSKeyPoints(cloud_src, resolution, keys_src);
+	// 降采样
+	pcl::PointCloud<PointT>::Ptr filter_src(new pcl::PointCloud<pcl::PointXYZ>);
+	PointCloudFilter::voxelGridFilter(cloud_src, filter_src, leaf_size);
 
-	pcl::PointCloud<PointT>::Ptr keys_tgt(new pcl::PointCloud<pcl::PointXYZ>);
-	getISSKeyPoints(cloud_tgt, resolution, keys_tgt);
+	pcl::PointCloud<PointT>::Ptr filter_tgt(new pcl::PointCloud<pcl::PointXYZ>);
+	PointCloudFilter::voxelGridFilter(cloud_src, filter_tgt, leaf_size);
 
-	// 特征描述
-	pcl::PointCloud<FeatureT>::Ptr features_src(new pcl::PointCloud<FeatureT>);
-	getFeatures(cloud_src, keys_src, resolution, features_src);
+	// 计算FPFH特征
+	pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs_src(new pcl::PointCloud<pcl::FPFHSignature33>());
+	calPFPH(filter_tgt, fpfhs_src, radius);
 
-	pcl::PointCloud<FeatureT>::Ptr features_tgt(new pcl::PointCloud<FeatureT>);
-	getFeatures(cloud_tgt, keys_tgt, resolution, features_tgt);
+	pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs_tgt(new pcl::PointCloud<pcl::FPFHSignature33>());
+	calPFPH(filter_tgt, fpfhs_tgt, radius);
 
-	// 计算对应匹配关系
-	pcl::registration::CorrespondenceEstimation<FeatureT, FeatureT> cor_est;
-	cor_est.setInputCloud(features_src);
-	cor_est.setInputTarget(features_tgt);
-	boost::shared_ptr<pcl::Correspondences> cor(new pcl::Correspondences);
-	cor_est.determineReciprocalCorrespondences(*cor);
-	std::cout << "compute Correspondences " << cor->size() << std::endl;
-
-	// 显示
-	pcl::visualization::PCLVisualizer viewer;
-	viewer.addPointCloud(cloud_src, "cloud_src"); // 显示点云
-	viewer.addPointCloud(cloud_tgt, "cloud_tgt");
-
-	pcl::visualization::PointCloudColorHandlerCustom<PointT> red_src(keys_src, 255, 0, 0);
-	pcl::visualization::PointCloudColorHandlerCustom<PointT> red_tgt(keys_tgt, 255, 0, 0);
-	viewer.addPointCloud(keys_src, red_src, "keys_src"); //显示关键点，红色，加粗
-	viewer.addPointCloud(keys_tgt, red_tgt, "keys_tgt");
-	viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "keys_src");
-	viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "keys_tgt");
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src_for_trans(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt_for_trans(new pcl::PointCloud<pcl::PointXYZ>);
-	for (size_t i = 0; i < cor->size(); ++i) // 显示关键点匹配关系
-	{
-		PointT temp1 = keys_src->points[cor->at(i).index_query];
-		PointT temp2 = keys_tgt->points[cor->at(i).index_match];
-		cloud_src_for_trans->points.push_back(temp1);
-		cloud_tgt_for_trans->points.push_back(temp2);
-		std::stringstream ss;
-		ss << "line_" << i;
-		viewer.addLine(temp1, temp2, ss.str());
-	}
-
-	// 计算旋转平移矩阵
-	Eigen::Matrix4f transformation(Eigen::Matrix4f::Identity());
-	//getTransformation(keys_src, keys_tgt, resolution, *cor, transformation);
-
-	// 计算transform之前将两边点集数量整理为一致
-	pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ> svd;
-	svd.estimateRigidTransformation(*cloud_tgt_for_trans, *cloud_src_for_trans, transformation);
-	//svd.estimateRigidTransformation(*cloud_src_for_trans, *cloud_tgt_for_trans, transformation);
-
-	cout << "begin transformation" << endl;
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_trans(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::transformPointCloud(*cloud_tgt, *cloud_trans, transformation); // 将原点云旋转
-	for (int i = 0; i < 4; i++) {
-		cout << endl;
-		for (int j = 0; j < 4; j++) {
-			cout << transformation(i, j) << " ";
-		}
-	}
-
-	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green_trans(cloud_trans, 0, 255, 0);
-	viewer.addPointCloud(cloud_trans, green_trans, "cloud_trans");
-	viewer.spin();
+	pcl::SampleConsensusInitialAlignment<pcl::PointXYZ, pcl::PointXYZ, pcl::FPFHSignature33> scia;
+	scia.setInputSource(cloud_src);
+	scia.setInputTarget(cloud_tgt);
+	scia.setSourceFeatures(fpfhs_src);
+	scia.setTargetFeatures(fpfhs_tgt);
+	//scia.setMinSampleDistance(1);
+	//scia.setNumberOfSamples(2);
+	//scia.setCorrespondenceRandomness(20);
+	pcl::PointCloud<PointT>::Ptr sac_result(new pcl::PointCloud<PointT>);
+	scia.align(*sac_result);
+	std::cout << "sac has converged:" << scia.hasConverged() << "  score: " << scia.getFitnessScore() << endl;
+	Eigen::Matrix4f sac_trans;
+	sac_trans = scia.getFinalTransformation();
+	std::cout << "transfrom:" << sac_trans << endl;
+	visualize_pcd(cloud_src, cloud_tgt, sac_result);
 }
 
 int match2PointCloud()

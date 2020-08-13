@@ -7,6 +7,7 @@
 #include "matchdemo.h"
 #include "searchpoints.h"
 #include "try_icp.h"
+#include "sacia.h"
 
 
 void showRotatePointCloud() {
@@ -32,8 +33,8 @@ void main(int argc, char** argv) {
 	// PointCloudFilter::uniformSampling();
 
 	// 滤波
-	//PointCloudFilter::bilateralFilter();
-	//PointCloudFilter::uniformSampling();
+	// PointCloudFilter::bilateralFilter();
+	// PointCloudFilter::uniformSampling();
 
 	// 表面降采样
 	//SurfaceVector::gengeratorVector();
@@ -49,6 +50,7 @@ void main(int argc, char** argv) {
 	// 两个点云集合的关键点匹配算出transformation
 	// match2PointCloud();
 	getCorsbPoint();
+	// saciaMatch();
 
 	// showRotatePointCloud();
 	//FeatureDescribes::ROPS();
@@ -57,4 +59,9 @@ void main(int argc, char** argv) {
 
 	// 测试icp
 	// icpMatch();
+	/*pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+	pcl::io::loadPCDFile("rabbit.pcd", *cloud);
+	pcl::PointCloud<PointT>::Ptr rotate(new pcl::PointCloud<PointT>);
+	VisualLization::rotatePointCloud(cloud, rotate);
+	pcl::io::savePCDFile("rabbit_rotate.pcd", *rotate);*/
 }

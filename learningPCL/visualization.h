@@ -82,7 +82,7 @@ public:
 		
 	}
 
-	static void rotatePointCloud(pcl::PointCloud<PointT>::Ptr cloud_src, pcl::PointCloud<PointT>::Ptr cloud_trans) {
+	static void rotatePointCloud(pcl::PointCloud<PointT>::Ptr &cloud_src, pcl::PointCloud<PointT>::Ptr &cloud_trans) {
 		//pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
 		//pcl::PointCloud<PointT>::Ptr cloud_trans(new pcl::PointCloud<PointT>);
 		//cloud_src = getPointCloud("rabbit.pcd");

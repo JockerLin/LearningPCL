@@ -13,6 +13,16 @@ typedef pcl::PointXYZ PointT;
 class PointCloudFilter {
 public:
 
+	static void voxelGridFilter(pcl::PointCloud<PointT>::Ptr &srcCloud, pcl::PointCloud<PointT>::Ptr &desCloud, double leafSize) {
+		std::vector<int> indices_tgt;
+		pcl::removeNaNFromPointCloud(*srcCloud, *srcCloud, indices_tgt);
+		pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
+		voxel_grid.setLeafSize(leafSize, leafSize, leafSize);
+		voxel_grid.setInputCloud(srcCloud);
+		voxel_grid.filter(*desCloud);
+		std::cout << "down size *srcCloud from " << srcCloud->size() << "to" << desCloud->size() << endl;
+	}
+
 	// 1-µãÔÆ½µ²ÉÑù
 	static void uniformSampling() {
 		pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
@@ -70,4 +80,26 @@ public:
 		//system("pause");
 
 	}
+
+	//static void bFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ, pcl::PointCloud<pcl::PointXYZ>::Ptr &outputXYZ) {
+	//	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
+	//	pcl::PointCloud<pcl::PointXYZI>::Ptr output(new pcl::PointCloud<pcl::PointXYZI>);
+	//	pcl::copyPointCloud(cloudXYZ, cloud);
+	//	
+	//	pcl::search::KdTree<pcl::PointXYZI>::Ptr tree1(new pcl::search::KdTree<pcl::PointXYZI>);
+	//	pcl::BilateralFilter<pcl::PointXYZI> fbf;
+	//	fbf.setInputCloud(cloud);
+	//	fbf.setSearchMethod(tree1);
+	//	fbf.setStdDev(0.1);
+	//	fbf.setHalfSize(0.1);
+	//	fbf.filter(*output);
+	//	std::cout << "output size :" << output->size() << std::endl;
+
+	//	/*pcl::visualization::PCLVisualizer viewer;
+	//	viewer.addPointCloud(output);
+	//	viewer.spin();*/
+
+	//	//system("pause");
+
+	//}
 };
