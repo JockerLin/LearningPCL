@@ -132,7 +132,11 @@ C:\Program Files\OpenNI2\Tools
 
 ## Project
 
-### 1、边缘拼接
+### 1、基于边缘拐点匹配的手机壳点云拼接
+
+目的：分别扫描手机壳的四个边缘，根据特征点匹配组合成一整个。
+
+![phone_scan](learningPCL/material/phone_scan.jpg)
 
 ![match](learningPCL/material/try_match_success_20200813.gif)
 
