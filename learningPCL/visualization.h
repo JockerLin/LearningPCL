@@ -348,9 +348,9 @@ public:
 		pcl::PointCloud<PointT>::Ptr cloud_0(new pcl::PointCloud<PointT>);
 		pcl::io::loadPCDFile("phone_good_part/phone0_add0.pcd", *cloud_0);
 		pcl::PointCloud<PointT>::Ptr cloud_1(new pcl::PointCloud<PointT>);
-		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone1_from2plane.pcd", *cloud_1);
+		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone1_plane_from2.pcd", *cloud_1);
 		pcl::PointCloud<PointT>::Ptr cloud_2(new pcl::PointCloud<PointT>);
-		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone2.pcd", *cloud_2);
+		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone2_plane.pcd", *cloud_2);
 		pcl::PointCloud<PointT>::Ptr cloud_3(new pcl::PointCloud<PointT>);
 		pcl::io::loadPCDFile("phone_good_part/transform_tgt_phone3.pcd", *cloud_3);
 
@@ -364,7 +364,12 @@ public:
 		viewer.addPointCloud(cloud_2, handler_2, "handler_2");
 		viewer.addPointCloud(cloud_3, handler_3, "handler_3");
 
+		pcl::PointCloud<PointT>::Ptr cloud_all(new pcl::PointCloud<PointT>);
+		*cloud_all = *cloud_0 + *cloud_1;
+		*cloud_all += *cloud_2;
+		*cloud_all += *cloud_3;
 		//viewer.addCoordinateSystem(1.0);
+		pcl::io::savePCDFile("phone_all.pcd", *cloud_all);
 		while (!viewer.wasStopped())
 		{
 			viewer.spinOnce(100);
