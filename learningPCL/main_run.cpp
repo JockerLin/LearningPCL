@@ -48,10 +48,10 @@ void main(int argc, char** argv) {
 	//FeatureDescribes::PFHOrSHOT();
 	
 	// 两个点云集合的关键点匹配算出transformation
-	// match2PointCloud();
+	match2PointCloud();
 	// getCorsbPoint();
 	// saciaMatch();
-	VisualLization::watchPhone4Part();
+	// VisualLization::watchPhone4Part();
 
 	// showRotatePointCloud();
 	//FeatureDescribes::ROPS();

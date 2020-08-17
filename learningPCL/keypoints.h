@@ -70,6 +70,7 @@ public:
 		detector.compute(*keypoints_temp);
 		pcl::console::print_highlight("Detected %d points !\n", keypoints_temp->size());
 		pcl::PointCloud<PointT>::Ptr keys(new pcl::PointCloud<pcl::PointXYZ>);
+		//类型转换成可视
 		pcl::copyPointCloud(*keypoints_temp, *keys);
 
 		VisualLization::comPare2PointCloud(cloud, keys);

@@ -117,7 +117,7 @@ void calPFPH(pcl::PointCloud<PointT>::Ptr &srcCloud, pcl::PointCloud<pcl::FPFHSi
 }
 
 
-void getCorrespondingTransform(pcl::PointCloud<PointT>::Ptr &cloud_src, pcl::PointCloud<PointT>::Ptr &cloud_tgt, Eigen::Matrix4f &sac_trans) {
+void getCorrespondingTransform(pcl::PointCloud<PointT>::Ptr &cloud_src, pcl::PointCloud<PointT>::Ptr &cloud_tgt, Eigen::Matrix4f &sac_trans, double leaf_size, bool visual) {
 	// 该函数计算的转换关系是：cloud_tgt = T * cloud_src
 	/*pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
 	pcl::io::loadPCDFile("roi_src_0_right.pcd", *cloud_src);
@@ -128,8 +128,8 @@ void getCorrespondingTransform(pcl::PointCloud<PointT>::Ptr &cloud_src, pcl::Poi
 	// 计算模型分辨率
 	double resolution = 0.05;
 	double radius = resolution * 18;
-	double leaf_size = 0.3;
-
+	//double leaf_size = 0.8;//降采样越多特征点越少
+	clock_t start_corrsp = clock();
 	// 降采样
 	pcl::PointCloud<PointT>::Ptr filter_src(new pcl::PointCloud<pcl::PointXYZ>);
 	PointCloudFilter::voxelGridFilter(cloud_src, filter_src, leaf_size);
@@ -158,7 +158,11 @@ void getCorrespondingTransform(pcl::PointCloud<PointT>::Ptr &cloud_src, pcl::Poi
 	// Eigen::Matrix4f sac_trans;
 	sac_trans = scia.getFinalTransformation();
 	std::cout << "transfrom:\n" << sac_trans << endl;
-	visualize_pcd(cloud_src, cloud_tgt, sac_result);
+	if (visual) {
+		visualize_pcd(cloud_src, cloud_tgt, sac_result);
+	}
+	cout << "粗匹配耗时" << clock() - start_corrsp << "ms" << endl;
+	
 }
 
 int match2PointCloudOldVersion()
@@ -280,7 +284,7 @@ int match2PointCloudOldVersion()
 
 	// 加入icp,继续优化transformation
 	Eigen::Matrix4f transformation_icp(Eigen::Matrix4f::Identity());
-	ICPMatch::run(cloud_src, cloud_trans, transformation_icp);
+	ICPMatch::run(cloud_src, cloud_trans, transformation_icp, 30, true);
 
 	// 0.302273 0.950977 0.0653723 75.2311
 	// -0.952828 0.299467 0.0493814 35.3466
@@ -323,13 +327,20 @@ void processR(Eigen::Matrix4f &transformation_all, Eigen::Matrix4f &transformati
 
 int match2PointCloud()
 {
-	// 读取点云
+	// 可调参数
+	// 计算模型分辨率
+	// 是否显示中间调试点云
+	bool visual = false;
+	int icp_iteration = 30;
+	double leaf_size = 0.8;
+	
+	double resolution = 0.05;
 	// 注意src与tgt的定义，src = T * tgt
 	pcl::PointCloud<PointT>::Ptr cloud_input_src(new pcl::PointCloud<PointT>);
 	pcl::io::loadPCDFile("phone0_add0.pcd", *cloud_input_src);
 
 	pcl::PointCloud<PointT>::Ptr cloud_input_tgt(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("phone3_add20.pcd", *cloud_input_tgt);
+	pcl::io::loadPCDFile("phone2_add20.pcd", *cloud_input_tgt);
 	//VisualLization::rotatePointCloud(cloud_src, cloud_tgt);
 
 	//// 选择ROI
@@ -358,19 +369,22 @@ int match2PointCloud()
 	//pcl::io::savePCDFile("roi_tgt.pcd", *cloud_tgt);
 
 	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("roi_src_0_right.pcd", *cloud_src);
+	pcl::io::loadPCDFile("roi_src_0_left.pcd", *cloud_src);
 
 	pcl::PointCloud<PointT>::Ptr cloud_tgt(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("roi_tgt_3_left.pcd", *cloud_tgt);
+	pcl::io::loadPCDFile("roi_tgt_2_right.pcd", *cloud_tgt);
 
-	// 计算模型分辨率
-	double resolution = 0.05;
+	clock_t start, end;
 
+	start = clock();
+	cout << "start cal" << endl;
+	
 	// 计算旋转平移矩阵
 	Eigen::Matrix4f transformation(Eigen::Matrix4f::Identity());
 	
 	// cloud_src =(约等于) T * cloud_tgt
-	getCorrespondingTransform(cloud_tgt, cloud_src, transformation);
+	
+	getCorrespondingTransform(cloud_tgt, cloud_src, transformation, leaf_size, visual);
 
 	cout << "begin transformation" << endl;
 
@@ -382,7 +396,7 @@ int match2PointCloud()
 	// 加入icp,继续优化transformation
 	// cloud_src = T_icp * cloud_trans
 	Eigen::Matrix4f transformation_icp(Eigen::Matrix4f::Identity());
-	ICPMatch::run(cloud_src, cloud_trans, transformation_icp);
+	ICPMatch::run(cloud_src, cloud_trans, transformation_icp, icp_iteration, visual);
 
 	// 0.302273 0.950977 0.0653723 75.2311
 	// -0.952828 0.299467 0.0493814 35.3466
@@ -400,6 +414,9 @@ int match2PointCloud()
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_finilly_trans(new pcl::PointCloud<pcl::PointXYZ>);
 	// cloud_src = transformation_all * cloud_tgt
 	pcl::transformPointCloud(*cloud_tgt, *cloud_finilly_trans, transformation_adjust); // 将原点云旋转
+	end = clock();
+	cout << "Run time: " << (double)(end - start) << "mS" << endl;
+
 	VisualLization::visualize3Pcd(cloud_src, cloud_tgt, cloud_finilly_trans);
 
 	pcl::visualization::PCLVisualizer viewer_finilly;
