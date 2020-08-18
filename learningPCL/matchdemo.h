@@ -161,8 +161,32 @@ void getCorrespondingTransform(pcl::PointCloud<PointT>::Ptr &cloud_src, pcl::Poi
 	if (visual) {
 		visualize_pcd(cloud_src, cloud_tgt, sac_result);
 	}
+	// filter_tgt = T * filter_src
 	cout << "粗匹配耗时" << clock() - start_corrsp << "ms" << endl;
-	
+
+	//对降采样的点云进行icp配准
+	//cout << "降采样上的细匹配" << endl;
+	//clock_t start_corrsp_cip = clock();
+	//// filter_src = T_icp * filter_tgt
+	//PointCloud::Ptr icp_result(new PointCloud);
+	//pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+	//icp.setInputSource(filter_src);
+	//icp.setInputTarget(filter_tgt);
+	////Set the max correspondence distance to 4cm (e.g., correspondences with higher distances will be ignored)
+	////icp.setMaxCorrespondenceDistance(0.04);
+	//// 最大迭代次数
+	//icp.setMaximumIterations(50);
+	//// 两次变化矩阵之间的差值
+	////icp.setTransformationEpsilon(1e-10);
+	//// 均方误差
+	////icp.setEuclideanFitnessEpsilon(0.2);
+	//icp.align(*icp_result, sac_trans);
+
+	//sac_trans = icp.getFinalTransformation();
+
+	//cout << "降采样细匹配完成\n" << sac_trans << endl;
+	//cout << "降采样细匹配耗时" << clock() - start_corrsp_cip << "ms" << endl;
+
 }
 
 int match2PointCloudOldVersion()
@@ -331,52 +355,51 @@ int match2PointCloud()
 	// 计算模型分辨率
 	// 是否显示中间调试点云
 	bool visual = false;
-	int icp_iteration = 30;
-	double leaf_size = 0.8;
-	
+	int icp_iteration = 50;
+	double leaf_size = 0.5;//叶子尺寸太小，虽然快，但是匹配不准特征
 	double resolution = 0.05;
+
 	// 注意src与tgt的定义，src = T * tgt
 	pcl::PointCloud<PointT>::Ptr cloud_input_src(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("phone0_add0.pcd", *cloud_input_src);
+	pcl::io::loadPCDFile("transform_3from0_height.pcd", *cloud_input_src);
 
 	pcl::PointCloud<PointT>::Ptr cloud_input_tgt(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("phone2_add20.pcd", *cloud_input_tgt);
+	pcl::io::loadPCDFile("part1.pcd", *cloud_input_tgt);
 	//VisualLization::rotatePointCloud(cloud_src, cloud_tgt);
 
-	//// 选择ROI
-	//pcl::visualization::PCLVisualizer viewer_select_ROI;
-	//viewer_select_ROI.addPointCloud(cloud_input_src);
-	//struct VisualLization::callback_args3 cb_args;
-	//cb_args.orgin_points = cloud_input_src;
-	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src(new pcl::PointCloud<pcl::PointXYZ>);
-	//cb_args.chosed_points_3d = cloud_src;
-	//cb_args.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(&viewer_select_ROI);
-	//viewer_select_ROI.registerAreaPickingCallback(VisualLization::ap_callback, (void*)&cb_args);
-	//viewer_select_ROI.spin();
+	// 选择ROI
+	pcl::visualization::PCLVisualizer viewer_select_ROI;
+	viewer_select_ROI.addPointCloud(cloud_input_src);
+	struct VisualLization::callback_args3 cb_args;
+	cb_args.orgin_points = cloud_input_src;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src(new pcl::PointCloud<pcl::PointXYZ>);
+	cb_args.chosed_points_3d = cloud_src;
+	cb_args.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(&viewer_select_ROI);
+	viewer_select_ROI.registerAreaPickingCallback(VisualLization::ap_callback, (void*)&cb_args);
+	viewer_select_ROI.spin();
 
-	//// 选择ROI
-	//pcl::visualization::PCLVisualizer viewer_select_ROI2;
-	//viewer_select_ROI2.addPointCloud(cloud_input_tgt);
-	//struct VisualLization::callback_args3 cb_args2;
-	//cb_args2.orgin_points = cloud_input_tgt;
-	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt(new pcl::PointCloud<pcl::PointXYZ>);
-	//cb_args2.chosed_points_3d = cloud_tgt;
-	//cb_args2.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(&viewer_select_ROI2);
-	//viewer_select_ROI2.registerAreaPickingCallback(VisualLization::ap_callback, (void*)&cb_args2);
-	//viewer_select_ROI2.spin();
+	// 选择ROI
+	pcl::visualization::PCLVisualizer viewer_select_ROI2;
+	viewer_select_ROI2.addPointCloud(cloud_input_tgt);
+	struct VisualLization::callback_args3 cb_args2;
+	cb_args2.orgin_points = cloud_input_tgt;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt(new pcl::PointCloud<pcl::PointXYZ>);
+	cb_args2.chosed_points_3d = cloud_tgt;
+	cb_args2.viewerPtr = pcl::visualization::PCLVisualizer::Ptr(&viewer_select_ROI2);
+	viewer_select_ROI2.registerAreaPickingCallback(VisualLization::ap_callback, (void*)&cb_args2);
+	viewer_select_ROI2.spin();
 
-	//pcl::io::savePCDFile("roi_src.pcd", *cloud_src);
-	//pcl::io::savePCDFile("roi_tgt.pcd", *cloud_tgt);
+	pcl::io::savePCDFile("roi_transform_3_right.pcd", *cloud_src);
+	pcl::io::savePCDFile("roi_1_left.pcd", *cloud_tgt);
 
-	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("roi_src_0_left.pcd", *cloud_src);
+	/*pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
+	pcl::io::loadPCDFile("roi_0_right.pcd", *cloud_src);
 
 	pcl::PointCloud<PointT>::Ptr cloud_tgt(new pcl::PointCloud<PointT>);
-	pcl::io::loadPCDFile("roi_tgt_2_right.pcd", *cloud_tgt);
+	pcl::io::loadPCDFile("roi_3_left.pcd", *cloud_tgt);*/
 
 	clock_t start, end;
 
-	start = clock();
 	cout << "start cal" << endl;
 	
 	// 计算旋转平移矩阵
@@ -391,11 +414,13 @@ int match2PointCloud()
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_trans(new pcl::PointCloud<pcl::PointXYZ>);
 	// cloud_trans = T * cloud_tgt
 	pcl::transformPointCloud(*cloud_tgt, *cloud_trans, transformation); // 将原点云旋转
-	//VisualLization::visualize3Pcd(cloud_src, cloud_tgt, cloud_trans);
+	end = clock();
+	VisualLization::visualize3Pcd(cloud_src, cloud_tgt, cloud_trans);
 
 	// 加入icp,继续优化transformation
 	// cloud_src = T_icp * cloud_trans
 	Eigen::Matrix4f transformation_icp(Eigen::Matrix4f::Identity());
+
 	ICPMatch::run(cloud_src, cloud_trans, transformation_icp, icp_iteration, visual);
 
 	// 0.302273 0.950977 0.0653723 75.2311
@@ -407,16 +432,14 @@ int match2PointCloud()
 	Eigen::Matrix4f transformation_adjust(Eigen::Matrix4f::Zero());
 	transformation_all = transformation_icp * transformation;//注意左右顺序
 	//Todo:最后只保留z轴旋转的矩阵与Tx Ty
-	processR(transformation_all, transformation_adjust);
+	//processR(transformation_all, transformation_adjust);
+	transformation_adjust = transformation_all;
 
 	cout << "transformation adjust :\n" << transformation_adjust << endl;
 	// transformation_all(2, 3) = 0;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_finilly_trans(new pcl::PointCloud<pcl::PointXYZ>);
 	// cloud_src = transformation_all * cloud_tgt
 	pcl::transformPointCloud(*cloud_tgt, *cloud_finilly_trans, transformation_adjust); // 将原点云旋转
-	end = clock();
-	cout << "Run time: " << (double)(end - start) << "mS" << endl;
-
 	VisualLization::visualize3Pcd(cloud_src, cloud_tgt, cloud_finilly_trans);
 
 	pcl::visualization::PCLVisualizer viewer_finilly;

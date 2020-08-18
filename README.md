@@ -76,7 +76,7 @@ C:\Program Files\OpenNI2\Tools
 
    - Harris
 
-     是基于2D的一个拓展
+     是基于2D的一个拓展，我针对Harris3D做的专门一个分析：[Harris角点分析从2D到3D（接口背后的故事系列）](https://www.notion.so/blazarlin/Harris-2D-3D-47cc455885a1478a829e577f55362e31)
 
    - SIFT
 

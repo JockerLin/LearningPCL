@@ -53,7 +53,7 @@ public:
 		bool isShow = true;
 		struct callback_args1 kb_args;
 		kb_args.isShow = &isShow;
-		kb_args.origin_points = pcd_src;
+		kb_args.origin_points = pcd_tgt;
 		kb_args.viewerPtr = viewer;
 		viewer->registerKeyboardCallback(kb_callback, (void*)&kb_args);
 		

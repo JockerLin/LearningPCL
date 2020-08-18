@@ -52,14 +52,15 @@ keyboardEventOccurred(const pcl::visualization::KeyboardEvent& event,
 		next_iteration = true;
 }
 
-static class ICPMatch {
+static class ICPMatch { 
 public:
 	static void run(PointCloudT::Ptr cloud_in, PointCloudT::Ptr cloud_icp, Eigen::Matrix4f & transformation_matrix, int iterations, bool debug) {
 		PointCloudT::Ptr cloud_tr(new PointCloudT);  // Transformed point cloud
 		//int iterations = 30;  // Default number of ICP iterations
-
+		// cloud_in = T_icp * cloud_icp
 		pcl::console::TicToc time;
 		time.tic();
+		clock_t icp_start=clock();
 		// 备份 以便后续查看匹配的效果
 		*cloud_tr = *cloud_icp;  // We backup cloud_icp into cloud_tr for later use
 		//Eigen::Matrix4f transformation_matrix = Eigen::Matrix4f::Identity();
@@ -72,7 +73,7 @@ public:
 		icp.setInputTarget(cloud_in);
 		icp.align(*cloud_icp);
 		icp.setMaximumIterations(1);  // We set this variable to 1 for the next time we will call .align () function
-		std::cout << "Applied " << iterations << " ICP iteration(s) in " << time.toc() << " ms" << std::endl;
+		std::cout << "Applied " << iterations << " ICP iteration(s) in " << time.toc() << " ms vs " << clock()- icp_start << std::endl;
 
 		// 最后一次对齐后返回收敛状态
 		if (icp.hasConverged())
