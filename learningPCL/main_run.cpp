@@ -71,6 +71,7 @@ void main(int argc, char** argv) {
 
 	// segmentation
 	// planeSegment();
-	cylinderSegment();
+	// cylinderSegment();
+	euclideanClusterExtraction();
 
 }
