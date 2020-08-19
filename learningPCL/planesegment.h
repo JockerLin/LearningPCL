@@ -325,7 +325,7 @@ int euclideanClusterExtraction() {
 			pcl::PointXYZHSV pt_hsv;
 			pcl::copyPointCloud<pcl::PointXYZ, pcl::PointXYZHSV>(pt, pt_hsv);*/
 		}
-			
+		
 		cloud_cluster->width = cloud_cluster->points.size();
 		cloud_cluster->height = 1;
 		cloud_cluster->is_dense = true;
