@@ -8,7 +8,8 @@
 #include "searchpoints.h"
 #include "try_icp.h"
 #include "sacia.h"
-
+#include "demofrominternet/matchrabbit.h"
+#include "planesegment.h"
 
 void showRotatePointCloud() {
 	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
@@ -48,7 +49,8 @@ void main(int argc, char** argv) {
 	//FeatureDescribes::PFHOrSHOT();
 	
 	// 两个点云集合的关键点匹配算出transformation
-	match2PointCloud();
+	// match2PointCloud();
+	// matchRabbitDemo();
 	
 	// getCorsbPoint();
 	// saciaMatch();
@@ -66,4 +68,9 @@ void main(int argc, char** argv) {
 	pcl::PointCloud<PointT>::Ptr rotate(new pcl::PointCloud<PointT>);
 	VisualLization::rotatePointCloud(cloud, rotate);
 	pcl::io::savePCDFile("rabbit_rotate.pcd", *rotate);*/
+
+	// segmentation
+	// planeSegment();
+	cylinderSegment();
+
 }

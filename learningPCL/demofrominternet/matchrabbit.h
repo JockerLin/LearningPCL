@@ -17,7 +17,7 @@ typedef pcl::PointXYZ PointT;
 typedef pcl::PointCloud<PointT> PointCloud;
 
 //点云可视化
-void visualize_pcd(PointCloud::Ptr pcd_src,
+void visualizePcd(PointCloud::Ptr pcd_src,
    PointCloud::Ptr pcd_tgt,
    PointCloud::Ptr pcd_final)
 {
@@ -41,7 +41,7 @@ void visualize_pcd(PointCloud::Ptr pcd_src,
 }
 
 //由旋转平移矩阵计算旋转角度
-void matrix2angle (Eigen::Matrix4f &result_trans,Eigen::Vector3f &result_angle)
+void matrix2angles (Eigen::Matrix4f &result_trans,Eigen::Vector3f &result_angle)
 {
   double ax,ay,az;
   if (result_trans(2,0)==1 || result_trans(2,0)==-1)
@@ -70,13 +70,13 @@ void matrix2angle (Eigen::Matrix4f &result_trans,Eigen::Vector3f &result_angle)
 }
 
 int
-   main (int argc, char** argv)
+   matchRabbitDemo ()
 {
    //加载点云文件
    PointCloud::Ptr cloud_src_o (new PointCloud);//原点云，待配准
-   pcl::io::loadPCDFile ("bunny_rotated.pcd",*cloud_src_o);  
+   pcl::io::loadPCDFile ("rabbit_rotate.pcd",*cloud_src_o);  
    PointCloud::Ptr cloud_tgt_o (new PointCloud);//目标点云
-   pcl::io::loadPCDFile ("bunny.pcd",*cloud_tgt_o);
+   pcl::io::loadPCDFile ("rabbit.pcd",*cloud_tgt_o);
 
    clock_t start=clock();
    //去除NAN点
@@ -85,7 +85,7 @@ int
    std::cout<<"remove *cloud_src_o nan"<<endl;
    //下采样滤波
    pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
-   voxel_grid.setLeafSize(0.012,0.012,0.012);
+   voxel_grid.setLeafSize(0.012, 0.012, 0.012);
    voxel_grid.setInputCloud(cloud_src_o);
    PointCloud::Ptr cloud_src (new PointCloud);
    voxel_grid.filter(*cloud_src);
@@ -197,7 +197,7 @@ int
    ANGLE_origin<<0,0,M_PI/5;
    double error_x,error_y,error_z;
    Eigen::Vector3f ANGLE_result;
-   matrix2angle(icp_trans,ANGLE_result);
+   matrix2angles(icp_trans,ANGLE_result);
    error_x=fabs(ANGLE_result(0))-fabs(ANGLE_origin(0));
    error_y=fabs(ANGLE_result(1))-fabs(ANGLE_origin(1));
    error_z=fabs(ANGLE_result(2))-fabs(ANGLE_origin(2));
@@ -205,6 +205,6 @@ int
    cout<<"error in aixs_x: "<<error_x<<"  error in aixs_y: "<<error_y<<"  error in aixs_z: "<<error_z<<endl;
 
    //可视化
-   visualize_pcd(cloud_src_o,cloud_tgt_o,icp_result);
+   visualizePcd(cloud_src_o,cloud_tgt_o,icp_result);
    return (0);
 }

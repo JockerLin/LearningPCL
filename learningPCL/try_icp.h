@@ -184,7 +184,7 @@ icpMatch()
 	PointCloudT::Ptr cloud_tr(new PointCloudT);  // Transformed point cloud
 	PointCloudT::Ptr cloud_icp(new PointCloudT);  // ICP output point cloud
 
-	int iterations = 10;  // Default number of ICP iterations
+	int iterations = 30;  // Default number of ICP iterations
 
 	pcl::console::TicToc time;
 	time.tic();
@@ -216,7 +216,7 @@ icpMatch()
 	// 输入点云cloud_in  目标匹配的点云cloud_icp 
 	pcl::transformPointCloud(*cloud_in, *cloud_icp, transformation_matrix);
 	// VisualLization::rotatePointCloud(cloud_in, cloud_icp);
-	ICPMatch::run(cloud_in, cloud_icp, transformation_matrix, 30, true);
+	ICPMatch::run(cloud_in, cloud_icp, transformation_matrix, iterations, true);
 	return (0);
 }
 
