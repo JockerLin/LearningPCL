@@ -335,11 +335,11 @@ int euclideanClusterExtraction() {
 		ss << "cloud_cluster_" << j << ".pcd";
 		writer.write<pcl::PointXYZ>(ss.str(), *cloud_cluster, false); //*
 		j++;
-		double hsv_color_r = (double)255.0*(double)j / (double)part_number;
-		cout << "r color:" << hsv_color_r << endl;
+		double color_r = (double)255.0*(double)j / (double)part_number;
+		cout << "r color:" << color_r << endl;
 		int g = 255 * rand() / (RAND_MAX + 1.0f);
 		int b = 255 * rand() / (RAND_MAX + 1.0f);
-		pcl::visualization::PointCloudColorHandlerCustom<PointT> color(cloud_cluster, hsv_color_r, g, b);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color(cloud_cluster, color_r, g, b);
 		viewer.addPointCloud(cloud_cluster, color, ss.str());
 	}
 	viewer.spin();
