@@ -9,7 +9,7 @@
 #include "try_icp.h"
 #include "sacia.h"
 #include "demofrominternet/matchrabbit.h"
-#include "planesegment.h"
+#include "segmentation.h"
 
 void showRotatePointCloud() {
 	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
@@ -21,10 +21,17 @@ void showRotatePointCloud() {
 
 }
 
+void errorPtrWrite() {
+	int *p;
+	int var = 123;
+	p = &var;
+	cout << *p << endl;
+}
+
 void main(int argc, char** argv) {
 	//自定义点云
 	//PointCloudBaseOperate::generatePointCloudShow();
-	
+	errorPtrWrite();
 	//VisualLization::rotatePointCloud();
 
 	// 最近邻搜索
@@ -69,9 +76,9 @@ void main(int argc, char** argv) {
 	VisualLization::rotatePointCloud(cloud, rotate);
 	pcl::io::savePCDFile("rabbit_rotate.pcd", *rotate);*/
 
-	// segmentation
-	// planeSegment();
-	// cylinderSegment();
-	euclideanClusterExtraction();
+	// 分割
+	//Segmentation::planeSegment();
+	Segmentation::cylinderSegment();
+	//Segmentation::euclideanClusterExtraction();
 
 }
