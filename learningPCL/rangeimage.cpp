@@ -2,6 +2,7 @@
 #include <boost/thread/thread.hpp>
 #include <pcl/common/common_headers.h>
 #include <pcl/range_image/range_image.h>    //关于深度图像的头文件
+#include <pcl/range_image/range_image_planar.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/range_image_visualizer.h>   //深度图可视化的头文件
 #include <pcl/visualization/pcl_visualizer.h>      //PCL可视化的头文件
@@ -162,4 +163,65 @@ int lookRangeImage()
 			range_image_widget.showRangeImage(range_image);
 		}
 	}
+}
+
+void showRangeImage()
+{
+	// Object for storing the point cloud.
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	// Object for storing the normals.
+	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+	// Read a PCD file from disk.
+	if (pcl::io::loadPCDFile<pcl::PointXYZ>("mask/mask_error0.pcd", *cloud) != 0)
+	{
+		return;
+	}
+	Eigen::Matrix4f T;
+	T << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 500,
+		0, 0, 0, 1;
+	Eigen::Matrix4f T1;
+	T1 << 0, -1, 0, 0,
+		1, 0, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
+	Eigen::Affine3f Traw(T*T1);
+	// Parameters needed by the planar range image object:
+
+	// Image size. Both Kinect and Xtion work at 640x480.
+	int imageSizeX = 320;
+	int imageSizeY = 600;
+	// Center of projection. here, we choose the middle of the image.
+	float centerX = imageSizeX / 2.0f;
+	float centerY = imageSizeY / 2.0f;
+	// Focal length. The value seen here has been taken from the original depth images.
+	// It is safe to use the same value vertically and horizontally.
+	float focalLengthX = 800.0f, focalLengthY = focalLengthX;
+	// Sensor pose. Thankfully, the cloud includes the data.
+	Eigen::Affine3f sensorPose = Traw;// Eigen::Affine3f(Eigen::Translation3f(0, 0, 0));
+
+	// Noise level. If greater than 0, values of neighboring points will be averaged.
+	// This would set the search radius (e.g., 0.03 == 3cm).
+	float noiseLevel = 0.0f;
+	// Minimum range. If set, any point closer to the sensor than this will be ignored.
+	float minimumRange = 0.0f;
+
+	// Planar range image object.
+	pcl::RangeImagePlanar rangeImagePlanar;
+	rangeImagePlanar.createFromPointCloudWithFixedSize(*cloud, imageSizeX, imageSizeY,
+		centerX, centerY, focalLengthX, focalLengthX,
+		sensorPose, pcl::RangeImage::LASER_FRAME,
+		noiseLevel, minimumRange);
+
+	// Visualize the image.
+	pcl::visualization::RangeImageVisualizer viewer("Planar range image");
+	viewer.showRangeImage(rangeImagePlanar);
+	viewer.spin();
+	//while (!viewer.wasStopped())
+	//{
+	//	viewer.spinOnce();
+	//	// Sleep 100ms to go easy on the CPU.
+	//	pcl_sleep(0.1);
+	//}
 }

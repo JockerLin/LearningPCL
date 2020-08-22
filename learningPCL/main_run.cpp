@@ -10,6 +10,8 @@
 #include "sacia.h"
 #include "demofrominternet/matchrabbit.h"
 #include "segmentation.h"
+#include "convexhull.h"
+
 
 void showRotatePointCloud() {
 	pcl::PointCloud<PointT>::Ptr cloud_src(new pcl::PointCloud<PointT>);
@@ -31,7 +33,7 @@ void errorPtrWrite() {
 void main(int argc, char** argv) {
 	//自定义点云
 	//PointCloudBaseOperate::generatePointCloudShow();
-	errorPtrWrite();
+	//errorPtrWrite();
 	//VisualLization::rotatePointCloud();
 
 	// 最近邻搜索
@@ -78,7 +80,14 @@ void main(int argc, char** argv) {
 
 	// 分割
 	//Segmentation::planeSegment();
-	Segmentation::cylinderSegment();
+	//Segmentation::cylinderSegment();
 	//Segmentation::euclideanClusterExtraction();
+
+	// 凸包检测
+	// detectHull();
+	// calHull();
+	PCL2RangeImage();
+
+	// showRangeImage();
 
 }
