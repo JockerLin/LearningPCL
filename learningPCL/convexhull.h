@@ -21,21 +21,25 @@ int PCL2RangeImage() {
 	cv::Mat range_image_normal = cv::Mat(6000, 3200, CV_32FC1, cv::Scalar::all(0));
 	cv::Mat range_image_uint;
 
-	//归一化 已经滤除了一些是否能恢复成连续
+	//归一化 已经滤除了一些
+	//todo恢复成连续
+	cout << (double)(cloud->points.size()) / (double)(6000 * 3200);
+	//为什么背景的比例占这么大，有效点数据这么少 只有0.009xx
 	for (int i = 0; i < cloud->points.size(); i++) {
 		pcl::PointXYZ pt = cloud->points.at(i);
 		int x = pt.x * 200;
 		int y = pt.y * 400;
 		range_image.at<float>(x, y) = pt.z;
-		cout << pt.x << " " << pt.y << " " << pt.z << endl;
+		//cout << x << " " << y << " " << pt.z << endl;
 	}
+	cout << range_image << endl;
 	cv::normalize(range_image, range_image_normal, 255, 0.0, cv::NORM_MINMAX);
 	range_image_normal.convertTo(range_image_uint, CV_8U);
 	cv::namedWindow("range image", cv::WINDOW_NORMAL);
 	cv::imshow("range image", range_image_uint);
 	cv::waitKey(0);
 	cout << range_image_uint << endl;
-	
+	return 0;
 }
 
 int calHull() {

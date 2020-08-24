@@ -6,12 +6,15 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/region_growing.h>
+#include <pcl/segmentation/supervoxel_clustering.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include "pointcloudfilter.h"
-
+//VTK include needed for drawing graph lines
+#include <vtkPolyLine.h>
 
 static class Segmentation {
 public:
@@ -343,5 +346,262 @@ public:
 		viewer.spin();
 
 		return (0);
+	}
+
+	// 区域生长方法
+	static int regionGrowing() {
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		if (pcl::io::loadPCDFile <pcl::PointXYZ>("examplemodel/region_growing_tutorial.pcd", *cloud) == -1)
+		{
+			std::cout << "Cloud reading failed." << std::endl;
+			return (-1);
+		}
+		
+		// 计算法向量
+		pcl::search::Search<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+		pcl::PointCloud <pcl::Normal>::Ptr normals(new pcl::PointCloud <pcl::Normal>);
+		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
+		normal_estimator.setSearchMethod(tree);
+		normal_estimator.setInputCloud(cloud);
+		normal_estimator.setKSearch(50);
+		normal_estimator.compute(*normals);
+		
+		//滤除Z数据
+		pcl::IndicesPtr indices(new std::vector <int>);
+		pcl::PassThrough<pcl::PointXYZ> pass;
+		pass.setInputCloud(cloud);
+		pass.setFilterFieldName("z");
+		pass.setFilterLimits(0.0, 1.0);
+		pass.filter(*indices);
+
+		pcl::RegionGrowing<pcl::PointXYZ, pcl::Normal> reg;
+		reg.setMinClusterSize(50);//最小集群点尺寸
+		reg.setMaxClusterSize(1000000);//最大集群点尺寸
+		reg.setSearchMethod(tree);
+		reg.setNumberOfNeighbours(30);//领域点
+		reg.setInputCloud(cloud);
+		//reg.setIndices (indices);
+		reg.setInputNormals(normals);
+		reg.setSmoothnessThreshold(3.0 / 180.0 * M_PI);//法线与法线的角度差阈值
+		reg.setCurvatureThreshold(1.0);//曲率法向量阈值
+
+		std::vector <pcl::PointIndices> clusters;
+		reg.extract(clusters);
+
+		std::cout << "Number of clusters is equal to " << clusters.size() << std::endl;
+		std::cout << "First cluster has " << clusters[0].indices.size() << " points." << std::endl;
+		std::cout << "These are the indices of the points of the initial" <<
+			std::endl << "cloud that belong to the first cluster:" << std::endl;
+		//第0簇点集数据
+		int counter = 0;
+		while (counter < clusters[0].indices.size())
+		{
+			std::cout << clusters[0].indices[counter] << ", ";
+			counter++;
+			if (counter % 10 == 0)
+				std::cout << std::endl;
+		}
+		std::cout << std::endl;
+
+		pcl::PointCloud <pcl::PointXYZRGB>::Ptr colored_cloud = reg.getColoredCloud();
+		pcl::visualization::PCLVisualizer viewer("Cluster viewer");
+		viewer.addPointCloud(colored_cloud);
+		//viewer.showCloud(colored_cloud);
+		viewer.spin();
+		/*while (!viewer.wasStopped())
+		{
+		}*/
+
+		return (0);
+	}
+
+	static int regionGrowingMask() {
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		if (pcl::io::loadPCDFile <pcl::PointXYZ>("mask/mask_error0.pcd", *cloud) == -1)
+		{
+			std::cout << "Cloud reading failed." << std::endl;
+			return (-1);
+		}
+
+		// 计算法向量
+		pcl::search::Search<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+		pcl::PointCloud <pcl::Normal>::Ptr normals(new pcl::PointCloud <pcl::Normal>);
+		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
+		normal_estimator.setSearchMethod(tree);
+		normal_estimator.setInputCloud(cloud);
+		normal_estimator.setKSearch(50);
+		normal_estimator.compute(*normals);
+
+		//滤除Z数据
+		pcl::IndicesPtr indices(new std::vector <int>);
+		pcl::PassThrough<pcl::PointXYZ> pass;
+		pass.setInputCloud(cloud);
+		pass.setFilterFieldName("z");
+		pass.setFilterLimits(0.0, 1.0);
+		pass.filter(*indices);
+
+		pcl::RegionGrowing<pcl::PointXYZ, pcl::Normal> reg;
+		reg.setMinClusterSize(50);//最小集群点尺寸
+		reg.setMaxClusterSize(1000000);//最大集群点尺寸
+		reg.setSearchMethod(tree);
+		reg.setNumberOfNeighbours(30);//领域点
+		reg.setInputCloud(cloud);
+		//reg.setIndices (indices);
+		reg.setInputNormals(normals);
+		reg.setSmoothnessThreshold(5.0 / 180.0 * M_PI);//法线与法线的角度差阈值
+		reg.setCurvatureThreshold(5.0);//曲率法向量阈值
+
+		std::vector <pcl::PointIndices> clusters;
+		reg.extract(clusters);
+
+		std::cout << "Number of clusters is equal to " << clusters.size() << std::endl;
+		std::cout << "First cluster has " << clusters[0].indices.size() << " points." << std::endl;
+		std::cout << "These are the indices of the points of the initial" <<
+			std::endl << "cloud that belong to the first cluster:" << std::endl;
+		//第0簇点集数据
+		int counter = 0;
+		while (counter < clusters[0].indices.size())
+		{
+			std::cout << clusters[0].indices[counter] << ", ";
+			counter++;
+			if (counter % 10 == 0)
+				std::cout << std::endl;
+		}
+		std::cout << std::endl;
+
+		pcl::PointCloud <pcl::PointXYZRGB>::Ptr colored_cloud = reg.getColoredCloud();
+		pcl::visualization::PCLVisualizer viewer("Cluster viewer");
+		viewer.addPointCloud(colored_cloud);
+		//viewer.showCloud(colored_cloud);
+		viewer.spin();
+		/*while (!viewer.wasStopped())
+		{
+		}*/
+
+		return (0);
+	}
+
+	//体素方法
+	static int superVoxel() {
+		/*if (argc < 2)
+		{
+			pcl::console::print_error("Syntax is: %s <pcd-file> \n "
+				"--NT Dsables the single cloud transform \n"
+				"-v <voxel resolution>\n-s <seed resolution>\n"
+				"-c <color weight> \n-z <spatial weight> \n"
+				"-n <normal_weight>\n", argv[0]);
+			return (1);
+		}*/
+
+
+		pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+		pcl::console::print_highlight("Loading point cloud...\n");
+		if (pcl::io::loadPCDFile<pcl::PointXYZRGBA>("mask/mask_error0.pcd", *cloud))
+		{
+			pcl::console::print_error("Error loading cloud file!\n");
+			return (1);
+		}
+
+		bool disable_transform = true;
+		float voxel_resolution = 0.008f;
+		float seed_resolution = 0.1f;
+		float color_importance = 0.2f;
+		float spatial_importance = 0.4f;
+		float normal_importance = 1.0f;
+
+		//////////////////////////////  //////////////////////////////
+		////// This is how to use supervoxels
+		//////////////////////////////  //////////////////////////////
+
+		pcl::SupervoxelClustering<pcl::PointXYZRGBA> super(voxel_resolution, seed_resolution);
+		if (disable_transform)
+			super.setUseSingleCameraTransform(false);
+		super.setInputCloud(cloud);
+		super.setColorImportance(color_importance);
+		super.setSpatialImportance(spatial_importance);
+		super.setNormalImportance(normal_importance);
+
+		std::map <std::uint32_t, pcl::Supervoxel<pcl::PointXYZRGBA>::Ptr > supervoxel_clusters;
+
+		pcl::console::print_highlight("Extracting supervoxels!\n");
+		super.extract(supervoxel_clusters);
+		pcl::console::print_info("Found %d supervoxels\n", supervoxel_clusters.size());
+
+		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
+		viewer->setBackgroundColor(0, 0, 0);
+
+		pcl::PointCloud<pcl::PointXYZRGBA>::Ptr voxel_centroid_cloud = super.getVoxelCentroidCloud();
+		viewer->addPointCloud(voxel_centroid_cloud, "voxel centroids");
+		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2.0, "voxel centroids");
+		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.95, "voxel centroids");
+
+		pcl::PointCloud<pcl::PointXYZL>::Ptr labeled_voxel_cloud = super.getLabeledVoxelCloud();
+		viewer->addPointCloud(labeled_voxel_cloud, "labeled voxels");
+		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "labeled voxels");
+
+		pcl::PointCloud<pcl::PointNormal>::Ptr sv_normal_cloud = super.makeSupervoxelNormalCloud(supervoxel_clusters);
+		//We have this disabled so graph is easy to see, uncomment to see supervoxel normals
+		//viewer->addPointCloudNormals<PointNormal> (sv_normal_cloud,1,0.05f, "supervoxel_normals");
+
+		pcl::console::print_highlight("Getting supervoxel adjacency\n");
+		std::multimap<std::uint32_t, std::uint32_t> supervoxel_adjacency;
+		super.getSupervoxelAdjacency(supervoxel_adjacency);
+		//To make a graph of the supervoxel adjacency, we need to iterate through the supervoxel adjacency multimap
+		for (auto label_itr = supervoxel_adjacency.cbegin(); label_itr != supervoxel_adjacency.cend(); )
+		{
+			//First get the label
+			std::uint32_t supervoxel_label = label_itr->first;
+			//Now get the supervoxel corresponding to the label
+			pcl::Supervoxel<pcl::PointXYZRGBA>::Ptr supervoxel = supervoxel_clusters.at(supervoxel_label);
+
+			//Now we need to iterate through the adjacent supervoxels and make a point cloud of them
+			pcl::PointCloud<pcl::PointXYZRGBA> adjacent_supervoxel_centers;
+			for (auto adjacent_itr = supervoxel_adjacency.equal_range(supervoxel_label).first; adjacent_itr != supervoxel_adjacency.equal_range(supervoxel_label).second; ++adjacent_itr)
+			{
+				pcl::Supervoxel<pcl::PointXYZRGBA>::Ptr neighbor_supervoxel = supervoxel_clusters.at(adjacent_itr->second);
+				adjacent_supervoxel_centers.push_back(neighbor_supervoxel->centroid_);
+			}
+			//Now we make a name for this polygon
+			std::stringstream ss;
+			ss << "supervoxel_" << supervoxel_label;
+			//This function is shown below, but is beyond the scope of this tutorial - basically it just generates a "star" polygon mesh from the points given
+			addSupervoxelConnectionsToViewer(supervoxel->centroid_, adjacent_supervoxel_centers, ss.str(), viewer);
+			//Move iterator forward to next label
+			label_itr = supervoxel_adjacency.upper_bound(supervoxel_label);
+		}
+
+		while (!viewer->wasStopped())
+		{
+			viewer->spinOnce(100);
+		}
+		return (0);
+	}
+
+	static void addSupervoxelConnectionsToViewer(pcl::PointXYZRGBA &supervoxel_center,
+		pcl::PointCloud<pcl::PointXYZRGBA> &adjacent_supervoxel_centers,
+		std::string supervoxel_name,
+		pcl::visualization::PCLVisualizer::Ptr & viewer) {
+
+		vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+		vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New();
+		vtkSmartPointer<vtkPolyLine> polyLine = vtkSmartPointer<vtkPolyLine>::New();
+
+		//Iterate through all adjacent points, and add a center point to adjacent point pair
+		for (auto adjacent_itr = adjacent_supervoxel_centers.begin(); adjacent_itr != adjacent_supervoxel_centers.end(); ++adjacent_itr)
+		{
+			points->InsertNextPoint(supervoxel_center.data);
+			points->InsertNextPoint(adjacent_itr->data);
+		}
+		// Create a polydata to store everything in
+		vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+		// Add the points to the dataset
+		polyData->SetPoints(points);
+		polyLine->GetPointIds()->SetNumberOfIds(points->GetNumberOfPoints());
+		for (unsigned int i = 0; i < points->GetNumberOfPoints(); i++)
+			polyLine->GetPointIds()->SetId(i, i);
+		cells->InsertNextCell(polyLine);
+		// Add the lines to the dataset
+		polyData->SetLines(cells);
+		viewer->addModelFromPolyData(polyData, supervoxel_name);
 	}
 };

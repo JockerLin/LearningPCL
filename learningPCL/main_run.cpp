@@ -82,8 +82,10 @@ void main(int argc, char** argv) {
 	//Segmentation::planeSegment();
 	//Segmentation::cylinderSegment();
 	//Segmentation::euclideanClusterExtraction();
+	//Segmentation::regionGrowingMask();
+	//Segmentation::superVoxel();
 
-	// Í¹°ü¼ì²â
+	// Í¹°ü¼ì²â todo
 	// detectHull();
 	// calHull();
 	PCL2RangeImage();
