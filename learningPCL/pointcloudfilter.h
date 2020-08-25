@@ -30,7 +30,7 @@ public:
 		pcl::console::print_highlight("load cloud!\n");
 		std::cout << "original cloud size : " << cloud->size() << std::endl;
 
-		// 使用体素化网络(VoxelGrid)降采样
+		// 使用体素化网络(VoxelGrid)降采样 设置六面立方体的边长大小 取立方体内点的质心
 		pcl::VoxelGrid<PointT> grid;//创建滤波对象
 		const float leaf = 0.005f;
 		grid.setLeafSize(leaf, leaf, leaf);//设置体素体积
@@ -39,7 +39,7 @@ public:
 		grid.filter(*voxelResult);//执行滤波
 		std::cout << "voxel downsample size :" << voxelResult->size() << std::endl;
 
-		// uniformSampling降采样
+		// uniformSampling降采样 设置球半径 取球类点的质心
 		pcl::UniformSampling<PointT> uniform_sampling;
 		uniform_sampling.setInputCloud(cloud);
 		double radius = 0.005f;
@@ -57,7 +57,7 @@ public:
 		system("pause");
 	}
 
-	// 2-双边滤波
+	// 2-双边滤波 需要有原始点云的强度信息
 	static void bilateralFilter() {
 		pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
 		pcl::io::loadPCDFile("rabbit.pcd", *cloud);
@@ -68,17 +68,17 @@ public:
 		pcl::BilateralFilter<pcl::PointXYZI> fbf;
 		fbf.setInputCloud(cloud);
 		fbf.setSearchMethod(tree1);
+		// 设置高斯双边滤波的窗口的一半大小，其中， sigma_s 设为 Gaussian 双边滤波窗口大小的一半。
 		fbf.setStdDev(0.1);
+		// 设置标准差参数为 sigma_r
 		fbf.setHalfSize(0.1);
 		fbf.filter(*output);
 		std::cout << "output size :" << output->size() << std::endl;
 
 		/*pcl::visualization::PCLVisualizer viewer;
-		viewer.addPointCloud(output);
-		viewer.spin();*/
-
-		//system("pause");
-
+		viewer.addPointCloud(output, "output");
+		viewer.spin();
+		system("pause");*/
 	}
 
 	//static void bFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ, pcl::PointCloud<pcl::PointXYZ>::Ptr &outputXYZ) {
