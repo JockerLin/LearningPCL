@@ -83,13 +83,13 @@ void main(int argc, char** argv) {
 	//Segmentation::planeSegment();
 	//Segmentation::cylinderSegment();
 	//Segmentation::euclideanClusterExtraction();
-	//Segmentation::regionGrowingMask();
+	Segmentation::regionGrowingMask();
 	//Segmentation::superVoxel();
 
 	// 凸包检测 todo
 	// detectHull();
 	// calHull();
-	PCL2RangeImage();
+	// PCL2RangeImage();
 
 	// showRangeImage();
 	// 文件数据转换

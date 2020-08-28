@@ -15,7 +15,7 @@
 
 int PCL2RangeImage() {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::io::loadPCDFile<pcl::PointXYZ>("mask/mask_error0.pcd", *cloud);
+	pcl::io::loadPCDFile<pcl::PointXYZ>("mask/mask_error1.pcd", *cloud);
 	//由于源数据降采样十倍导致 尺寸由（6000,3200）=>(600,320)
 	int rows = 600, cols = 320;
 	cv::Mat range_image = cv::Mat(rows, cols, CV_32FC1, cv::Scalar::all(0));
@@ -69,7 +69,7 @@ int PCL2RangeImage() {
 	//cv::normalize(range_image, range_image_normal, 255, 0.0, cv::NORM_MINMAX);
 
 	range_image_normal.convertTo(range_image_uint, CV_8U);
-	cv::imwrite("range_image2.jpg", range_image_uint);
+	cv::imwrite("range_image1.jpg", range_image_uint);
 	cv::namedWindow("range image", cv::WINDOW_NORMAL);
 	cv::imshow("range image", range_image_uint);
 	cv::waitKey(0);

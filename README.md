@@ -142,6 +142,13 @@ C:\Program Files\OpenNI2\Tools
 
 
 
+2、面膜有高度的缺陷
+
+深度图像：
+
+<img src="learningPCL/maskerrorimage/pcd2image/range_image0_fit.jpg" style="zoom:50%;" />
+
+<img src="learningPCL/maskerrorimage/pcd2image/range_image1_fit.jpg" style="zoom:50%;" />
 
 ## Reference
 
