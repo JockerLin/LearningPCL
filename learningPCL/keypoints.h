@@ -15,12 +15,12 @@ public:
 	// ISS Key Points
 	static void ISSDetector() {
 		pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
-		//pcl::io::loadPCDFile("rabbit.pcd", *cloud);
-		cloud = VisualLization::getPointCloud("phone2_add20.pcd");
+		pcl::io::loadPCDFile("rabbit.pcd", *cloud);
+		//cloud = VisualLization::getPointCloud("phone2_add20.pcd");
 		std::cout << "original cloud size : " << cloud->size() << std::endl;
 		clock_t start = clock();
 		// 分辨率越小 关键点越多
-		double resolution = 0.05;
+		double resolution = 0.0005;
 
 		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>());
 

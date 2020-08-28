@@ -45,7 +45,7 @@ void main(int argc, char** argv) {
 
 	// 滤波
 	// PointCloudFilter::bilateralFilter();
-	PointCloudFilter::uniformSampling();
+	// PointCloudFilter::uniformSampling();
 
 	// 表面降采样
 	//SurfaceVector::gengeratorVector();
@@ -89,14 +89,14 @@ void main(int argc, char** argv) {
 	// 凸包检测 todo
 	// detectHull();
 	// calHull();
-	// PCL2RangeImage();
+	PCL2RangeImage();
 
 	// showRangeImage();
 	// 文件数据转换
-	FileTools::txt2RangeImage(
+	/*FileTools::txt2RangeImage(
 		"C:/Users/suzhefeng/Downloads/0821maskdata/1620_height.txt",
 		6000,
 		',',
-		"range_image0936.jpg");
+		"range_image0936.jpg");*/
 	
 }

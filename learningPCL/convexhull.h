@@ -16,31 +16,192 @@
 int PCL2RangeImage() {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::io::loadPCDFile<pcl::PointXYZ>("mask/mask_error0.pcd", *cloud);
-	
-	cv::Mat range_image = cv::Mat(6000, 3200, CV_32FC1, cv::Scalar::all(0));
-	cv::Mat range_image_normal = cv::Mat(6000, 3200, CV_32FC1, cv::Scalar::all(0));
+	//由于源数据降采样十倍导致 尺寸由（6000,3200）=>(600,320)
+	int rows = 600, cols = 320;
+	cv::Mat range_image = cv::Mat(rows, cols, CV_32FC1, cv::Scalar::all(0));
+	cv::Mat range_image_normal = cv::Mat(rows, cols, CV_32FC1, cv::Scalar::all(0));
 	cv::Mat range_image_uint;
-
-	//归一化 已经滤除了一些
+	//todo:0828 归一化方法还是要修改，初始定义全0图像，后续归一化因素也会受到0的影响 done已修改
 	//todo恢复成连续
-	cout << (double)(cloud->points.size()) / (double)(6000 * 3200);
+	cout << (double)(cloud->points.size()) / (double)(rows * cols);
 	//为什么背景的比例占这么大，有效点数据这么少 只有0.009xx
+	float max_z, min_z;
+
 	for (int i = 0; i < cloud->points.size(); i++) {
+		
 		pcl::PointXYZ pt = cloud->points.at(i);
-		int x = pt.x * 200;
-		int y = pt.y * 400;
+		if (0 == i) {
+			max_z = pt.z;
+			min_z = pt.z;
+		}
+		else {
+			if (pt.z > max_z) {
+				max_z = pt.z;
+			}
+			if (pt.z < min_z) {
+				min_z = pt.z;
+			}
+		}
+		int x = pt.x * 40;
+		int y = pt.y * 20;
 		range_image.at<float>(x, y) = pt.z;
 		//cout << x << " " << y << " " << pt.z << endl;
 	}
-	cout << range_image << endl;
-	cv::normalize(range_image, range_image_normal, 255, 0.0, cv::NORM_MINMAX);
+
+	// 自定义归一方案能消除无像素区域的影响
+	double normal_rate = (double)(255.0) / (max_z - min_z);
+	for (int iRow = 0; iRow < rows; iRow = iRow + 1) {
+		for (int jCol = 0; jCol < cols; jCol = jCol + 1) {
+			double cur_z = range_image.at<float>(iRow, jCol);
+			float normal_z_int = 0.0;
+			if (cur_z != 0) {
+				//不为零就是正常的数据
+				float normal_z = (cur_z - min_z)*normal_rate;
+				normal_z_int = normal_z;
+
+			}
+			range_image_normal.at<float>(iRow, jCol) = normal_z_int;
+			//cout << "cur_z:" << cur_z <<", "<< "normal z:" << normal_z_int << endl;
+		}
+	}
+
+	// cv归一方案
+	//cv::normalize(range_image, range_image_normal, 255, 0.0, cv::NORM_MINMAX);
+
 	range_image_normal.convertTo(range_image_uint, CV_8U);
+	cv::imwrite("range_image2.jpg", range_image_uint);
 	cv::namedWindow("range image", cv::WINDOW_NORMAL);
 	cv::imshow("range image", range_image_uint);
 	cv::waitKey(0);
-	cout << range_image_uint << endl;
+	//cout << range_image_uint << endl;
 	return 0;
 }
+
+int txt2RangeImage(string file, int rowsCount, char splitStr, int sampleRowsCols, pcl::PointCloud<pcl::PointXYZ>::Ptr outCloud, bool saveFileFlag, string saveFile) {
+	clock_t start_read_file = clock();
+	bool save_model = true;
+
+	ifstream fp(file);
+	vector<vector<double>> user_arr;
+	vector<vector<double>> range_image;
+
+	string line;
+	int rows_count = rowsCount;
+	int cols_count = 3200;
+	cv::Mat range_image_cv = cv::Mat(rows_count, cols_count, CV_32FC1, cv::Scalar::all(0));
+	cv::Mat range_image_uint8 = cv::Mat(rows_count, cols_count, CV_8UC1, cv::Scalar::all(0));
+
+	int add_number = 0;
+	int max_x = 0, max_y = 0, max_z = 0;
+	int min_x = 0, min_y = 0, min_z = 0;
+	vector<double> height_data;
+	double z_max = -0.001;
+	double z_min = 0.001;
+	int unvaliable_times = 0;
+	bool init_min_max = false;
+
+	for (int iRow = 0; iRow < rows_count; iRow = iRow + 1) {
+		string line;
+		getline(fp, line);
+		//cout << "line before \n" << line << endl;
+
+		// 删除\0
+		string::iterator it;
+		for (it = line.begin(); it != line.end(); it++)
+		{
+			if (*it == '\0')
+			{
+				line.erase(it); //STL erase函数
+				if (it != line.begin()) {
+					it--;
+				}
+
+			}
+		}
+		//cout << "line after \n" << line << endl;
+		vector<double> data_line;
+		vector<double> data_line_range;
+		string number;
+		istringstream readstr(line);
+		if (0 == iRow % 200) {
+			cout << "another 200 rows ==> " << iRow << endl;
+		}
+
+		for (int jCol = 0; jCol < cols_count; jCol = jCol + 1) {
+			getline(readstr, number, splitStr);
+
+			//float x = (float)jCol * 0.005;
+			//float y = (float)iRow * 0.02;
+			double z = (double)atoi(number.c_str())*0.00001;
+			//极值初始化
+
+			if ((false == init_min_max) && (z > -21.47483)) {
+				z_max = z;
+				z_min = z;
+				init_min_max = true;
+			}
+			data_line.push_back(z);
+			if (z > -21.47483 && init_min_max) {
+				//z = z*0.00001;
+				data_line_range.push_back(z);
+				if (z < z_min) {
+					z_min = z;
+				}
+				if (z >= z_max) {
+					z_max = z;
+				}
+				//cout << "z:"<<z << endl;
+			}
+			else {
+				//cout << "outside point:" << z << endl;
+				z = 0;
+				// 如果设置为0可能影响后续的归一化计算。。。。。。
+				data_line_range.push_back(z);
+				unvaliable_times++;
+			}
+		}
+		user_arr.push_back(data_line);
+		range_image.push_back(data_line_range);
+	}
+	double normal_rate = (double)(255.0) / (z_max - z_min);
+	int all_datas_num = rows_count * cols_count;
+	cout << "z max:" << z_max << ",z min:" << z_min << endl;
+	cout << "unvaliable_times:" << unvaliable_times << endl;
+	cout << "all_datas:" << all_datas_num << endl;
+	cout << "rate:" << (double)unvaliable_times / (double)all_datas_num << endl;
+	cout << "normal_rate:" << normal_rate << endl;
+
+	for (int iRow = 0; iRow < rows_count; iRow = iRow + 1) {
+		for (int jCol = 0; jCol < cols_count; jCol = jCol + 1) {
+			double cur_z = range_image[iRow][jCol];
+			float normal_z_int = 0.0;
+			if (cur_z != 0) {
+				//不为零就是正常的数据
+				float normal_z = (cur_z - z_min)*normal_rate;
+				normal_z_int = normal_z;
+
+			}
+			range_image_cv.at<float>(iRow, jCol) = normal_z_int;
+			//cout << "cur_z:" << cur_z <<", "<< "normal z:" << normal_z_int << endl;
+		}
+	}
+
+	range_image_cv.convertTo(range_image_uint8, CV_8U);
+	//归一化
+	//cv::Mat mat_image(range_image);
+	cv::namedWindow("range image", cv::WINDOW_NORMAL);
+	cv::imshow("range image", range_image_uint8);
+	cv::waitKey(0);
+	cv::imwrite("range_image.jpg", range_image_uint8);
+	//cout << range_image_uint8 << endl;
+
+	fp.close();
+	outCloud->width = (int)outCloud->points.size();
+	outCloud->height = 1;
+	return 0;
+
+}
+
 
 int calHull() {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
