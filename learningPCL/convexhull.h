@@ -186,6 +186,7 @@ int txt2RangeImage(string file, int rowsCount, char splitStr, int sampleRowsCols
 		}
 	}
 
+	//图像要uint8显示才不会出问题，出现全黑img可能是因为类型的问题。
 	range_image_cv.convertTo(range_image_uint8, CV_8U);
 	//归一化
 	//cv::Mat mat_image(range_image);

@@ -64,7 +64,7 @@ void main(int argc, char** argv) {
 	
 	// getCorsbPoint();
 	// saciaMatch();
-	// VisualLization::watchPhone4Part();
+	VisualLization::watchPhone4Part();
 
 	// showRotatePointCloud();
 	//FeatureDescribes::ROPS();
@@ -83,7 +83,7 @@ void main(int argc, char** argv) {
 	//Segmentation::planeSegment();
 	//Segmentation::cylinderSegment();
 	//Segmentation::euclideanClusterExtraction();
-	Segmentation::regionGrowingMask();
+	//Segmentation::regionGrowingMask();
 	//Segmentation::superVoxel();
 
 	// Í¹°ü¼ì²â todo
