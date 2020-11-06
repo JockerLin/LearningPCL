@@ -1,5 +1,6 @@
 #pragma once
-
+//#include <vtkAutoInit.h>
+//#include <vtkRenderWindow.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 // 包含相关头文件

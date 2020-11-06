@@ -19,6 +19,7 @@
 #include <fstream>  
 #include <sstream>
 
+
 using namespace std;
 typedef pcl::PointXYZ PointT;
 typedef pcl::PointXYZRGB PointRGB;
@@ -398,7 +399,12 @@ public:
 		while (!viewer.wasStopped())
 		{
 			viewer.spinOnce(100);
-			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+			//boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 		}
 	}
 };
+
+/*
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误	LNK2001	无法解析的外部符号 "void __cdecl vtkRenderingOpenGL_AutoInit_Construct(void)" (?vtkRenderingOpenGL_AutoInit_Construct@@YAXXZ)	learningPCL	D:\CodingLife\LearningPCL\learningPCL\surfacevector.obj	1
+*/

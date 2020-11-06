@@ -154,3 +154,14 @@ C:\Program Files\OpenNI2\Tools
 
 http://www.pclcn.org/study/shownews.php?lang=cn&id=205
 
+## 错误记录
+
+1、C2079 “pcl::KdTreeFLANN...param_k_”使用未定义的 struct“flann::SearchParams”
+
+项目需要用到OpenCV和PCL，在分别单独添加现有属性时并不会报错，两个属性添加到统一项目时出现报上述错误。
+
+查找了各种解决方案：比如：包含目录、库目录，代码包含include"···.hpp"等等解决方案，均没有得到解决。
+
+后来发现属性加载要有顺序：这里使用kdtree时，调用的是PCL的库，把pcl属性（.props文件）移除，再重新添加，使其在OpenCV属性文件之前就解决了问题。如果两者直接添加到“附加依赖项”，也应该注意先后顺序。
+
+这里遇到这样的问题，归根结底是PCL库和OpenCV库冲突的问题，两者都包含flann库，至于解决方案，应该有很多博客，以后遇到再搞。

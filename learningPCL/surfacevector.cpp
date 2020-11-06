@@ -1,3 +1,4 @@
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 // 包含相关头文件
@@ -7,9 +8,8 @@
 #include "surfacevector.h"
 //#include <vtkAutoInit.h>
 //VTK_MODULE_INIT(vtkRenderingOpenGL);
-#include <vtkAutoInit.h>
-VTK_MODULE_INIT(vtkRenderingOpenGL)
-VTK_MODULE_INIT(vtkInteractionStyle)
+//VTK_MODULE_INIT(vtkRenderingOpenGL)
+//VTK_MODULE_INIT(vtkInteractionStyle)
 
 
 void SurfaceVector::gengeratorVector() {

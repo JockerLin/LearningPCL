@@ -66,12 +66,12 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="cv3-4-10PropertySheet.props" />
-    <Import Project="PCLPropertySheet.props" />
+    <Import Project="cv340DIYPropertySheetDebug.props" />
+    <Import Project="PCL190PropertySheet_debug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="cv3-4-10PropertySheetRelease.props" />
+    <Import Project="cv340DIYPropertySheetRelease.props" />
     <Import Project="PCLPropertySheet_release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />

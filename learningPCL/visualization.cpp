@@ -10,6 +10,9 @@
 #include <pcl/visualization/range_image_visualizer.h>   //深度图可视化的头文件
 #include "visualization.h"
 
+// 严重性	代码	说明	项目	文件	行	禁止显示状态
+//错误	C1083	无法打开包括文件 : “new”: No such file or directory	learningPCL	c : \program files\pcl 1.9.0\3rdparty\eigen\eigen3\eigen\core	82
+
 
 void
 setViewerPose2(pcl::visualization::PCLVisualizer& viewer, const Eigen::Affine3f& viewer_pose)
