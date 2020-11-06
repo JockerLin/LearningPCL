@@ -438,7 +438,7 @@ public:
 		pass.setInputCloud(cloud);
 		pass.setFilterFieldName("z");
 		pass.setFilterLimits(0.0, 1.0);
-		pass.filter(*indices);
+		pass.filter(*indices); 
 
 		pcl::RegionGrowing<pcl::PointXYZ, pcl::Normal> reg;
 		reg.setMinClusterSize(50);//最小集群点尺寸
