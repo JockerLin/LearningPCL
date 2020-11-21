@@ -62,6 +62,7 @@ void generatroRangeImage() {
 
 	boost::shared_ptr<pcl::RangeImage> range_image_ptr(new pcl::RangeImage);
 	pcl::RangeImage& range_image = *range_image_ptr;
+
 	/*
 	 关于range_image.createFromPointCloud（）参数的解释 （涉及的角度都为弧度为单位） ：
 	   point_cloud为创建深度图像所需要的点云
@@ -75,6 +76,7 @@ void generatroRangeImage() {
 	   min_range 设置最小的获取距离，小于最小的获取距离的位置为传感器的盲区
 	   border_size  设置获取深度图像边缘的宽度 默认为0
 	*/
+
 	range_image.createFromPointCloud(
 		*cloud,
 		angularResolution,

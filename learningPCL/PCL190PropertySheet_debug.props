@@ -4,8 +4,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_PropertySheetDisplayName>PCL1.9.0PropertySheetDebug</_PropertySheetDisplayName>
-    <LibraryPath>C:\Program Files\PCL 1.9.0\OpenNI2\Lib;C:\Program Files\PCL 1.9.0\3rdParty\VTK\lib;C:\Program Files\PCL 1.9.0\3rdParty\Qhull\lib;C:\Program Files\PCL 1.9.0\3rdParty\FLANN\lib;C:\Program Files\PCL 1.9.0\3rdParty\Boost\lib;C:\Program Files\PCL 1.9.0\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files\PCL 1.9.0\OpenNI2\Include;C:\Program Files\PCL 1.9.0\3rdParty\VTK\include\vtk-8.1;C:\Program Files\PCL 1.9.0\3rdParty\Qhull\include;C:\Program Files\PCL 1.9.0\3rdParty\FLANN\include;C:\Program Files\PCL 1.9.0\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.9.0\3rdParty\Boost\include\boost-1_68;C:\Program Files\PCL 1.9.0\include\pcl-1.9;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\PCL 1.9.0\OpenNI2\Lib;C:\Program Files\PCL 1.9.0\3rdParty\VTK_comp_self\lib;C:\Program Files\PCL 1.9.0\3rdParty\Qhull\lib;C:\Program Files\PCL 1.9.0\3rdParty\FLANN\lib;C:\Program Files\PCL 1.9.0\3rdParty\Boost\lib;C:\Program Files\PCL 1.9.0\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\PCL 1.9.0\OpenNI2\Include;C:\Program Files\PCL 1.9.0\3rdParty\VTK_comp_self\include\vtk-8.1;C:\Program Files\PCL 1.9.0\3rdParty\Qhull\include;C:\Program Files\PCL 1.9.0\3rdParty\FLANN\include;C:\Program Files\PCL 1.9.0\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.9.0\3rdParty\Boost\include\boost-1_68;C:\Program Files\PCL 1.9.0\include\pcl-1.9;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
