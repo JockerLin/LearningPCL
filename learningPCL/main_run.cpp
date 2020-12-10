@@ -38,7 +38,7 @@ void main(int argc, char** argv) {
 	//VisualLization::rotatePointCloud();
 
 	// 最近邻搜索
-	//PointCloudBaseOperate::kdTreeFlann();
+	PointCloudBaseOperate::kdTreeFlann();
 
 	// 点云降采样
 	// PointCloudFilter::uniformSampling();
@@ -64,6 +64,8 @@ void main(int argc, char** argv) {
 	
 	// getCorsbPoint();
 	// saciaMatch();
+
+	// 查看手机壳拼接四部分
 	VisualLization::watchPhone4Part();
 
 	// showRotatePointCloud();

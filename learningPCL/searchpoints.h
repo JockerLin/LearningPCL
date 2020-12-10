@@ -137,12 +137,14 @@ public:
 		pcl::io::loadPCDFile("rabbit.pcd", *cloud);
 
 		//定义kdtree
+		// 创建KdTreeFLANN对象，并把创建的点云设置为输入,创建一个searchPoint变量作为查询点
 		pcl::KdTreeFLANN<PointRGB>::Ptr kdtree(new pcl::KdTreeFLANN<PointRGB>);
 		kdtree->setInputCloud(cloud);
 
 		vector<int> indices, indices2;
 		vector<float> distances, distances2;
 
+		// 定义查询的点位第0个点
 		PointRGB point = cloud->points[0];
 		cloud->points[0].g = 255;
 

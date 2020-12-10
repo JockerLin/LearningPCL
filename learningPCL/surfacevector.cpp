@@ -1,10 +1,3 @@
-
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-// 包含相关头文件
-#include <pcl/features/normal_3d.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include "visualization.h"
 #include "surfacevector.h"
 //#include <vtkAutoInit.h>
 //VTK_MODULE_INIT(vtkRenderingOpenGL);

@@ -6,7 +6,7 @@
 // 包含相关头文件
 #include <pcl/features/normal_3d.h>
 #include <pcl/visualization/pcl_visualizer.h>
-
+#include "visualization.h"
 
 typedef pcl::PointXYZ PointT;
 typedef pcl::PointNormal PointNT; // 也可以pcl::Normal,但无法用PCLVisualizer显示。

@@ -1,13 +1,4 @@
-#include <iostream>
-#include <pcl/common/common_headers.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/visualization/cloud_viewer.h>
-#include <pcl/console/parse.h>
-#include <pcl/filters/filter.h>
-#include <pcl/search/kdtree.h>
-#include <pcl/range_image/range_image.h>
-#include <pcl/visualization/range_image_visualizer.h>   //深度图可视化的头文件
+
 #include "visualization.h"
 
 // 严重性	代码	说明	项目	文件	行	禁止显示状态

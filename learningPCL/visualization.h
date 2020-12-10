@@ -19,7 +19,6 @@
 #include <fstream>  
 #include <sstream>
 
-
 using namespace std;
 typedef pcl::PointXYZ PointT;
 typedef pcl::PointXYZRGB PointRGB;
