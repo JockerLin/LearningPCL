@@ -32,13 +32,16 @@ void errorPtrWrite() {
 }
 
 void main(int argc, char** argv) {
+
+	VisualLization::baseOperate();
+
 	//自定义点云
 	//PointCloudBaseOperate::generatePointCloudShow();
 	//errorPtrWrite();
 	//VisualLization::rotatePointCloud();
 
 	// 最近邻搜索
-	PointCloudBaseOperate::kdTreeFlann();
+	// PointCloudBaseOperate::kdTreeFlann();
 
 	// 点云降采样
 	// PointCloudFilter::uniformSampling();
@@ -66,7 +69,7 @@ void main(int argc, char** argv) {
 	// saciaMatch();
 
 	// 查看手机壳拼接四部分
-	VisualLization::watchPhone4Part();
+	// VisualLization::watchPhone4Part();
 
 	// showRotatePointCloud();
 	//FeatureDescribes::ROPS();

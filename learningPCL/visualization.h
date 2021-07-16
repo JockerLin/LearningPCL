@@ -130,8 +130,9 @@ public:
 
 		// --- 显示点云数据 ----
 	// "cloud1" 为显示id，默认cloud,显示多个点云时用默认会报警告。
-		pcl::visualization::PointCloudColorHandlerCustom<PointT> green(cloud2, 0, 255, 0); // rgb
-		viewer.addPointCloud(cloud1, green, "cloud1");
+		// 同时显示点云cloud1
+		//pcl::visualization::PointCloudColorHandlerCustom<PointT> green(cloud2, 0, 255, 0); // rgb
+		//viewer.addPointCloud(cloud1, green, "cloud1");
 		//viewer.addPointCloud(cloud1, "cloud1");
 
 
@@ -143,6 +144,35 @@ public:
 		PointT temp1 = cloud1->points[0];
 		PointT temp2 = cloud2->points[1];
 		viewer.addLine(temp1, temp2, "line0");
+
+		viewer.addCoordinateSystem();
+
+#pragma region 0708新增
+#include <vtkRenderWindow.h>
+#include <vtkPNGReader.h>
+#include <vtkImageData.h>
+#include <vtkLogoRepresentation.h>
+#include <vtkLogoWidget.h>
+#include <vtkAxesActor.h>
+#include <vtkOrientationMarkerWidget.h>
+#include <vtkScalarBarWidget.h>
+#include <vtkScalarBarActor.h>
+#include <vtkScalarBarRepresentation.h>
+#include <vtkColorTransferFunction.h>
+
+		vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+		vtkSmartPointer<vtkOrientationMarkerWidget> axes_widget_member_;
+		axes_widget_member_ = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
+		axes_widget_member_->SetOutlineColor(0.9300, 0.5700, 0.1300);
+		axes_widget_member_->SetOrientationMarker(axes);
+		axes_widget_member_->SetInteractor(viewer.getRenderWindow()->GetInteractor());
+		//axes_widget_member_->SetViewport(x, y, x_wide, y_wide);
+		axes_widget_member_->SetEnabled(true);
+		axes_widget_member_->InteractiveOn();
+		axes_widget_member_->InteractiveOff();
+
+#pragma endregion
+
 		// 同样可以设置线的颜色，
 		//viewer.addLine(temp1, temp2, 255，0，0， "line0");
 
