@@ -147,31 +147,31 @@ public:
 
 		viewer.addCoordinateSystem();
 
-#pragma region 0708新增
-#include <vtkRenderWindow.h>
-#include <vtkPNGReader.h>
-#include <vtkImageData.h>
-#include <vtkLogoRepresentation.h>
-#include <vtkLogoWidget.h>
-#include <vtkAxesActor.h>
-#include <vtkOrientationMarkerWidget.h>
-#include <vtkScalarBarWidget.h>
-#include <vtkScalarBarActor.h>
-#include <vtkScalarBarRepresentation.h>
-#include <vtkColorTransferFunction.h>
-
-		vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
-		vtkSmartPointer<vtkOrientationMarkerWidget> axes_widget_member_;
-		axes_widget_member_ = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
-		axes_widget_member_->SetOutlineColor(0.9300, 0.5700, 0.1300);
-		axes_widget_member_->SetOrientationMarker(axes);
-		axes_widget_member_->SetInteractor(viewer.getRenderWindow()->GetInteractor());
-		//axes_widget_member_->SetViewport(x, y, x_wide, y_wide);
-		axes_widget_member_->SetEnabled(true);
-		axes_widget_member_->InteractiveOn();
-		axes_widget_member_->InteractiveOff();
-
-#pragma endregion
+//#pragma region 0708新增
+//#include <vtkRenderWindow.h>
+//#include <vtkPNGReader.h>
+//#include <vtkImageData.h>
+//#include <vtkLogoRepresentation.h>
+//#include <vtkLogoWidget.h>
+//#include <vtkAxesActor.h>
+//#include <vtkOrientationMarkerWidget.h>
+//#include <vtkScalarBarWidget.h>
+//#include <vtkScalarBarActor.h>
+//#include <vtkScalarBarRepresentation.h>
+//#include <vtkColorTransferFunction.h>
+//
+//		vtkSmartPointer<vtkAxesActor> axes = vtkSmartPointer<vtkAxesActor>::New();
+//		vtkSmartPointer<vtkOrientationMarkerWidget> axes_widget_member_;
+//		axes_widget_member_ = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
+//		axes_widget_member_->SetOutlineColor(0.9300, 0.5700, 0.1300);
+//		axes_widget_member_->SetOrientationMarker(axes);
+//		axes_widget_member_->SetInteractor(viewer.getRenderWindow()->GetInteractor());
+//		//axes_widget_member_->SetViewport(x, y, x_wide, y_wide);
+//		axes_widget_member_->SetEnabled(true);
+//		axes_widget_member_->InteractiveOn();
+//		axes_widget_member_->InteractiveOff();
+//
+//#pragma endregion
 
 		// 同样可以设置线的颜色，
 		//viewer.addLine(temp1, temp2, 255，0，0， "line0");
